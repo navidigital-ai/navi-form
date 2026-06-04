@@ -430,7 +430,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
       </div>
       <div class="field">
         <label class="field-label">Телефон <span class="req">обязательно</span></label>
-        <input type="tel" id="f-phone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="formatPhone(this)">
+        <input type="tel" id="f-phone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="formatPhone(this)" onkeydown="phoneKeydown(event)">
         <div class="field-error" id="e-phone">Укажите номер телефона</div>
       </div>
       <div class="field">
@@ -911,13 +911,31 @@ function buildPriceFields(blocks) {
 }
 
 // ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function phoneKeydown(e) {
+  // При Backspace, если курсор в конце и перед ним разделитель — стираем до цифры включительно
+  if (e.key === 'Backspace') {
+    const inp = e.target;
+    const atEnd = inp.selectionStart === inp.value.length && inp.selectionStart === inp.selectionEnd;
+    if (atEnd) {
+      const digits = inp.value.replace(/\D/g, '');
+      e.preventDefault();
+      const newDigits = digits.slice(0, -1);
+      inp.value = newDigits;
+      formatPhone(inp);
+    }
+  }
+}
+
 function formatPhone(inp) {
   let v = inp.value.replace(/\D/g, '');
+  // Если поле пустое — оставляем пустым (можно стереть всё)
+  if (v.length === 0) { inp.value = ''; return; }
+  // 8 в начале → 7
   if (v.startsWith('8')) v = '7' + v.slice(1);
-  if (!v.startsWith('7') && v.length > 0) v = '7' + v;
+  // первая цифра не 7/8 → считаем что это номер без кода, добавляем 7
+  if (v[0] !== '7') v = '7' + v;
   v = v.slice(0, 11);
-  let out = '';
-  if (v.length > 0) out = '+' + v[0];
+  let out = '+' + v[0];
   if (v.length > 1) out += ' (' + v.slice(1, 4);
   if (v.length >= 4) out += ') ' + v.slice(4, 7);
   if (v.length >= 7) out += '-' + v.slice(7, 9);
