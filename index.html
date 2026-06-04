@@ -575,7 +575,7 @@ const DIRS = {
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
         { id: 'ai_time_photo', label: 'Срок: фото-сет (5–10 изображений)', placeholder: 'пр. 1–2 дня' },
-        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'пр. 2–3 дня' },
+        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'пр. 1–2 дня' },
       ]},
     ],
     priceBlocks: [
@@ -595,7 +595,7 @@ const DIRS = {
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
         { id: 'v_time_reel', label: 'Срок: рилс / сторис 15–30 сек (съёмка + монтаж)', placeholder: 'пр. 1–2 дня' },
-        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'пр. 3–5 дней' },
+        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'пр. 1–3 дня' },
       ]},
       { title: 'Работаете с ИИ-вставками в монтаже?', type: 'yesno', id: 'v_ai' },
     ],
@@ -613,9 +613,9 @@ const DIRS = {
       { title: 'Стиль анимации (можно выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
         { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'пр. 1–2 дня' },
-        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 3–5 дней' },
+        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 1–2 дня' },
         { id: 'm_time_ai', label: 'ИИ-анимация 30 сек', placeholder: 'пр. 1–2 дня' },
-        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'пр. 5–10 дней' },
+        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'пр. 2–5 дней' },
       ]},
     ],
     priceBlocks: [
@@ -630,8 +630,8 @@ const DIRS = {
       { title: 'Специализация (можно выбрать несколько)', type: 'multi', id: 'd_spec', options: ['Логотипы','Брендинг','Иллюстрации','Персонажи','Полиграфия','Сувенирка','Оформление соцсетей','Презентации','Маркетплейсы и карточки товаров','Свой вариант'] },
       { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'd_soft', options: ['Figma','Adobe Illustrator','Photoshop','CorelDRAW','Canva','Используете ИИ (Midjourney, Firefly и др.)','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'dual_text', fields: [
-        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'пр. 3–5 дней' },
-        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'пр. 7–14 дней' },
+        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'пр. 1–2 дня' },
+        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'пр. 4–12 дней' },
       ]},
       { title: 'Готовите макеты в печать?', type: 'yesno', id: 'd_print' },
     ],
@@ -694,7 +694,7 @@ const DIRS = {
       { title: 'Формат сотрудничества (можно выбрать несколько)', type: 'multi', id: 'smm_format', options: ['Полный SMM-пакет','Только тексты','Только визуал','Только таргет','Разовые задачи'] },
       { title: 'Кол-во постов в месяц, которые готовы(а) закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'пр. 12–16 постов' },
       { title: 'Готовы(а) к долгосрочному сотрудничеству?', type: 'yesno', id: 'smm_longterm' },
-      { title: 'Есть опыт в нише: digital, творческие студии, образование?', type: 'yesno', id: 'smm_exp' },
+      { title: 'Есть опыт в нише: творческие студии, образование?', type: 'yesno', id: 'smm_exp' },
     ],
     priceBlocks: [
       { id: 'p_smm_full', label: 'Ведение одного клиента в месяц (полный пакет)' },
@@ -716,8 +716,8 @@ const DIRS = {
       ]},
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
         { id: 'bot_time_simple', label: 'Простой бот (FAQ / лид-бот)', placeholder: 'пр. 1–3 дня' },
-        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'пр. 5–10 дней' },
-        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'пр. 10–20 дней' },
+        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'пр. 4–8 дней' },
+        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'пр. 8–20 дней' },
       ]},
     ],
     priceBlocks: [
