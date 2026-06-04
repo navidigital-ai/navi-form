@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>НАВИ — База фрилансеров</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #12121a;
+  --bg3: #1a1a24;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.18);
+  --accent: #7c6cfa;
+  --accent2: #c084fc;
+  --text: #f0eff8;
+  --text2: #9896b0;
+  --text3: #5a5870;
+  --success: #4ade80;
+  --error: #f87171;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Golos Text', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* BG glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(124,108,250,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header { text-align: center; margin-bottom: 48px; }
+.logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(22px, 5vw, 32px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle { font-size: 15px; color: var(--text2); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+
+/* Step indicator */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 36px;
+  justify-content: center;
+}
+.step-item { display: flex; align-items: center; gap: 0; }
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: var(--text3);
+  transition: all 0.3s;
+}
+.step-num.active { border-color: var(--accent); color: var(--accent); background: rgba(124,108,250,0.1); }
+.step-num.done { border-color: var(--success); color: var(--success); background: rgba(74,222,128,0.1); }
+.step-line { width: 40px; height: 1.5px; background: var(--border); margin: 0 4px; }
+.step-line.done { background: var(--accent); }
+
+/* Card */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+.section-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Direction picker */
+.dir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.dir-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  color: var(--text);
+}
+.dir-btn:hover { border-color: var(--border-hover); background: rgba(124,108,250,0.06); }
+.dir-btn.selected { border-color: var(--accent); background: rgba(124,108,250,0.12); }
+.dir-btn-icon { font-size: 22px; margin-bottom: 8px; }
+.dir-btn-label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; }
+.dir-btn-sub { font-size: 11px; color: var(--text3); }
+
+/* Form fields */
+.field { margin-bottom: 18px; }
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field-label .req { color: var(--accent); font-size: 11px; }
+.field-hint { font-size: 11px; color: var(--text3); margin-bottom: 6px; line-height: 1.4; }
+
+input[type=text], input[type=tel], input[type=url], textarea, select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Golos Text', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type=text]:focus, input[type=tel]:focus, input[type=url]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,108,250,0.12);
+}
+input::placeholder, textarea::placeholder { color: var(--text3); }
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239896b0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+
+/* Checkbox multi */
+.check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 9px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.3;
+}
+.check-item:hover { border-color: var(--border-hover); }
+.check-item.checked { border-color: var(--accent); color: var(--text); background: rgba(124,108,250,0.08); }
+.check-item input[type=checkbox] { display: none; }
+.check-box {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border: 1.5px solid var(--text3);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+  transition: all 0.15s;
+}
+.check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
+.check-box::after { content: ''; display: none; width: 4px; height: 7px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+.check-item.checked .check-box::after { display: block; }
+
+/* City autocomplete */
+.autocomplete-wrap { position: relative; }
+.autocomplete-list {
+  background: var(--bg2);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+  overflow: hidden;
+  display: none;
+}
+.autocomplete-list.open { display: block; }
+.autocomplete-item {
+  padding: 9px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover, .autocomplete-item.highlighted { background: rgba(124,108,250,0.1); color: var(--text); }
+.autocomplete-item.special { color: var(--accent); font-style: italic; }
+.autocomplete-loader { padding: 10px 14px; font-size: 12px; color: var(--text3); }
+
+/* Price range */
+.price-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.price-sep { font-size: 13px; color: var(--text3); text-align: center; }
+
+/* Radio */
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-item {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.radio-item:hover { border-color: var(--border-hover); }
+.radio-item.selected { border-color: var(--accent); color: var(--text); background: rgba(124,108,250,0.08); }
+.radio-item input { display: none; }
+.radio-dot { width: 14px; height: 14px; border: 1.5px solid var(--text3); border-radius: 50%; flex-shrink: 0; transition: all 0.15s; }
+.radio-item.selected .radio-dot { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px var(--bg3); }
+
+/* Submit */
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 8px;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Success screen */
+.success-screen {
+  display: none;
+  text-align: center;
+  padding: 60px 20px;
+}
+.success-icon { font-size: 56px; margin-bottom: 20px; }
+.success-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--success), #86efac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.success-text { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+/* Error message */
+.field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
+.field-error.show { display: block; }
+input.error, textarea.error, select.error { border-color: var(--error); }
+
+/* Nav buttons */
+.nav-row { display: flex; gap: 10px; margin-top: 8px; }
+.back-btn {
+  flex: 0 0 auto;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: 'Golos Text', sans-serif;
+  font-size: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.back-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+/* Responsive */
+@media(max-width:480px) {
+  .card { padding: 20px 16px; }
+  .check-grid { grid-template-columns: 1fr; }
+  .dir-grid { grid-template-columns: 1fr 1fr; }
+  .price-row { grid-template-columns: 1fr auto 1fr; }
+}
+
+/* Progress bar */
+.progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 32px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo"><span class="logo-dot"></span>НАВИ · Digital Studio</div>
+    <h1>База фрилансеров</h1>
+    <p class="subtitle">Заполните анкету — мы добавим вас в нашу базу и будем обращаться, когда появится подходящий заказ</p>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps" id="steps">
+    <div class="step-item"><div class="step-num active" id="s1">1</div></div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step-item"><div class="step-num" id="s2">2</div></div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step-item"><div class="step-num" id="s3">3</div></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:33%"></div></div>
+
+  <form id="main-form" novalidate>
+
+  <!-- STEP 1: Contacts + Direction -->
+  <div id="step1">
+    <div class="card">
+      <div class="section-title">Контакты</div>
+      <div class="field">
+        <label class="field-label">Имя <span class="req">обязательно</span></label>
+        <input type="text" id="f-name" placeholder="Как вас зовут?">
+        <div class="field-error" id="e-name">Пожалуйста, укажите имя</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Telegram или телефон <span class="req">обязательно</span></label>
+        <input type="text" id="f-contact" placeholder="@username или +7...">
+        <div class="field-error" id="e-contact">Укажите Telegram или телефон</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Часовой пояс <span class="req">обязательно</span></label>
+        <select id="f-tz">
+          <option value="">— выберите —</option>
+          <option value="GMT−12:00">GMT−12:00 — Бейкер, Хауленд (о-ва США)</option>
+          <option value="GMT−11:00">GMT−11:00 — Паго-Паго (Американское Самоа), Мидуэй</option>
+          <option value="GMT−10:00">GMT−10:00 — Гонолулу (Гавайи), Таити</option>
+          <option value="GMT−09:30">GMT−09:30 — Маркизские острова (Фр. Полинезия)</option>
+          <option value="GMT−09:00">GMT−09:00 — Анкоридж, Джуно (Аляска)</option>
+          <option value="GMT−08:00">GMT−08:00 — Лос-Анджелес, Сан-Франциско, Ванкувер (PST)</option>
+          <option value="GMT−07:00">GMT−07:00 — Денвер, Финикс, Солт-Лейк-Сити (MST)</option>
+          <option value="GMT−06:00">GMT−06:00 — Чикаго, Даллас, Мехико, Гватемала (CST)</option>
+          <option value="GMT−05:00">GMT−05:00 — Нью-Йорк, Майами, Торонто, Богота (EST)</option>
+          <option value="GMT−04:30">GMT−04:30 — Каракас (Венесуэла)</option>
+          <option value="GMT−04:00">GMT−04:00 — Ла-Пас, Манагуа, Сантьяго, Галифакс</option>
+          <option value="GMT−03:30">GMT−03:30 — Сент-Джонс (Ньюфаундленд, Канада)</option>
+          <option value="GMT−03:00">GMT−03:00 — Бразилиа, Буэнос-Айрес, Монтевидео, Сан-Паулу</option>
+          <option value="GMT−02:00">GMT−02:00 — Фернанду-ди-Норонья, Южная Георгия</option>
+          <option value="GMT−01:00">GMT−01:00 — Азорские о-ва, о-ва Зелёного Мыса, Прая</option>
+          <option value="GMT+00:00">GMT+00:00 — Лондон, Дублин, Лиссабон, Рейкьявик, Абиджан</option>
+          <option value="GMT+01:00">GMT+01:00 — Берлин, Париж, Рим, Мадрид, Варшава, Лагос (CET)</option>
+          <option value="GMT+02:00">GMT+02:00 — Калининград, Киев, Хельсинки, Каир, Йоханнесбург</option>
+          <option value="GMT+03:00">GMT+03:00 — Москва, Санкт-Петербург, Стамбул, Эр-Рияд, Найроби</option>
+          <option value="GMT+03:30">GMT+03:30 — Тегеран (Иран)</option>
+          <option value="GMT+04:00">GMT+04:00 — Самара, Ижевск, Ульяновск, Дубай, Баку, Маскат</option>
+          <option value="GMT+04:30">GMT+04:30 — Кабул (Афганистан)</option>
+          <option value="GMT+05:00">GMT+05:00 — Екатеринбург, Тюмень, Карачи, Ташкент, Исламабад</option>
+          <option value="GMT+05:30">GMT+05:30 — Мумбаи, Дели, Калькутта, Коломбо (Индия, Шри-Ланка)</option>
+          <option value="GMT+05:45">GMT+05:45 — Катманду (Непал)</option>
+          <option value="GMT+06:00">GMT+06:00 — Омск, Дакка, Алматы, Нур-Султан, Бишкек</option>
+          <option value="GMT+06:30">GMT+06:30 — Янгон (Мьянма), Кокосовые о-ва</option>
+          <option value="GMT+07:00">GMT+07:00 — Красноярск, Новосибирск, Томск, Барнаул, Бангкок, Джакарта</option>
+          <option value="GMT+08:00">GMT+08:00 — Иркутск, Улан-Удэ, Пекин, Сингапур, Куала-Лумпур, Перт</option>
+          <option value="GMT+08:45">GMT+08:45 — Юкла (Западная Австралия)</option>
+          <option value="GMT+09:00">GMT+09:00 — Якутск, Чита, Токио, Сеул, Улан-Батор</option>
+          <option value="GMT+09:30">GMT+09:30 — Дарвин, Аделаида (Центральная Австралия)</option>
+          <option value="GMT+10:00">GMT+10:00 — Владивосток, Хабаровск, Сидней, Мельбурн, Порт-Морсби</option>
+          <option value="GMT+10:30">GMT+10:30 — Лорд-Хау (о-в Австралии)</option>
+          <option value="GMT+11:00">GMT+11:00 — Магадан, Южно-Сахалинск, Нумеа, Хониара</option>
+          <option value="GMT+12:00">GMT+12:00 — Петропавловск-Камчатский, Окленд, Веллингтон, Фиджи</option>
+          <option value="GMT+12:45">GMT+12:45 — Чатем (о-ва Новой Зеландии)</option>
+          <option value="GMT+13:00">GMT+13:00 — Апиа (Самоа), Нукуалофа (Тонга), Феникс</option>
+          <option value="GMT+14:00">GMT+14:00 — Киритимати (о-ва Лайн, Кирибати)</option>
+        </select>
+        <div class="field-error" id="e-tz">Выберите часовой пояс</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Направление</div>
+      <div class="field">
+        <label class="field-label">Выберите вашу специализацию <span class="req">обязательно</span></label>
+        <div class="dir-grid" id="dir-grid">
+          <button type="button" class="dir-btn" data-dir="ai"><div class="dir-btn-icon">✦</div><span class="dir-btn-label">ИИ-генерация</span><span class="dir-btn-sub">Midjourney, Runway, Kling</span></button>
+          <button type="button" class="dir-btn" data-dir="video"><div class="dir-btn-icon">◈</div><span class="dir-btn-label">Видеооператор</span><span class="dir-btn-sub">Съёмка, монтаж</span></button>
+          <button type="button" class="dir-btn" data-dir="motion"><div class="dir-btn-icon">◎</div><span class="dir-btn-label">Моушн-дизайн</span><span class="dir-btn-sub">AE, C4D, Blender</span></button>
+          <button type="button" class="dir-btn" data-dir="design"><div class="dir-btn-icon">◇</div><span class="dir-btn-label">Графдизайн</span><span class="dir-btn-sub">Бренды, полиграфия</span></button>
+          <button type="button" class="dir-btn" data-dir="web"><div class="dir-btn-icon">⬡</div><span class="dir-btn-label">Веб-разработка</span><span class="dir-btn-sub">Tilda, Webflow</span></button>
+          <button type="button" class="dir-btn" data-dir="photo"><div class="dir-btn-icon">◉</div><span class="dir-btn-label">Фотограф</span><span class="dir-btn-sub">Предметная, коммерческая</span></button>
+          <button type="button" class="dir-btn" data-dir="smm"><div class="dir-btn-icon">⊕</div><span class="dir-btn-label">SMM / Контент</span><span class="dir-btn-sub">Соцсети, рилсы</span></button>
+          <button type="button" class="dir-btn" data-dir="bot"><div class="dir-btn-icon">⬟</div><span class="dir-btn-label">Чат-боты</span><span class="dir-btn-sub">TG, VK, no-code, AI</span></button>
+        </div>
+        <div class="field-error" id="e-dir">Выберите направление</div>
+      </div>
+    </div>
+
+    <button type="button" class="submit-btn" onclick="goStep2()">Далее →</button>
+  </div>
+
+  <!-- STEP 2: Direction-specific fields -->
+  <div id="step2" style="display:none">
+    <div id="geo-block" style="display:none">
+      <div class="card">
+        <div class="section-title">Местоположение</div>
+        <div class="field">
+          <label class="field-label">Город <span class="req">обязательно</span></label>
+          <p class="field-hint">Начните вводить название — система найдёт автоматически</p>
+          <div class="autocomplete-wrap">
+            <input type="text" id="f-city" placeholder="Например: Владивосток" autocomplete="off" oninput="cityInput()">
+            <div class="autocomplete-list" id="city-list"></div>
+          </div>
+          <input type="hidden" id="f-city-val">
+          <div id="city-custom-wrap" style="display:none; margin-top:8px;">
+            <input type="text" id="f-city-custom" placeholder="Введите город и регион вручную...">
+          </div>
+          <div class="field-error" id="e-city">Укажите город</div>
+        </div>
+      </div>
+    </div>
+    <div id="spec-fields"></div>
+    <div class="nav-row">
+      <button type="button" class="back-btn" onclick="goStep1()">← Назад</button>
+      <button type="button" class="submit-btn" onclick="goStep3()" style="flex:1">Далее →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Prices + portfolio + comment -->
+  <div id="step3" style="display:none">
+    <div id="price-fields"></div>
+    <div class="card">
+      <div class="section-title">Портфолио</div>
+      <div class="field">
+        <label class="field-label">Ссылка на портфолио / шоурил / примеры работ</label>
+        <input type="url" id="f-portfolio" placeholder="https://...">
+      </div>
+      <div class="field">
+        <label class="field-label">Дополнительные навыки, комментарии, пожелания</label>
+        <textarea id="f-comment" placeholder="Расскажите о себе, опыте, особых условиях сотрудничества..."></textarea>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button type="button" class="back-btn" onclick="goStep2b()">← Назад</button>
+      <button type="button" class="submit-btn" id="submit-btn" onclick="submitForm()">Отправить анкету ✓</button>
+    </div>
+  </div>
+
+  </form>
+
+  <!-- Success -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✦</div>
+    <div class="success-title">Анкета отправлена!</div>
+    <p class="success-text">Спасибо! Мы добавили вас в базу НАВИ.<br>Когда появится подходящий проект — напишем вам.</p>
+  </div>
+
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// ЗАМЕНИТЕ на ваши значения:
+const GOOGLE_SCRIPT_URL = 'ВСТАВЬТЕ_СЮДА_URL_GOOGLE_APPS_SCRIPT';
+const DADATA_TOKEN = 'edbce6e7ea5643553d7e45efeb67c8247e3e353f';
+// ─────────────────────────────────────────────────────────────────────────────
+
+let selectedDir = null;
+let cityTimer = null;
+
+// Direction needs geo
+const GEO_DIRS = ['video', 'photo'];
+
+// Direction data
+const DIRS = {
+  ai: {
+    label: 'ИИ-генерация фото/видео',
+    specBlocks: [
+      { title: 'Фото-генераторы (выбрать несколько)', type: 'multi', id: 'ai_photo_tools', options: ['Midjourney','Stable Diffusion','DALL·E','Flux','Adobe Firefly','Nanobanana','Свой вариант'] },
+      { title: 'Видео-генераторы (выбрать несколько)', type: 'multi', id: 'ai_video_tools', options: ['Runway','Kling','Sora','Hailuo','Pika','Свой вариант'] },
+      { title: 'Аудио-инструменты (выбрать несколько)', type: 'multi', id: 'ai_audio_tools', options: ['Udio','Suno','ElevenLabs','Свой вариант'] },
+      { title: 'Направленность ИИ-контента (выбрать несколько)', type: 'multi', id: 'ai_scope', options: ['Товарные фото','Фудфото','Фэшн-лукбуки','Портреты и модели','Рекламные визуализации','ИИ-видеоролики','Аватары и персонажи','Реставрация фото','Оживление фото','Стилизация','Липсинг (lip sync)','Свой вариант'] },
+      { title: 'Продвинутые навыки', type: 'radio3', fields: [
+        { id: 'ai_lora', label: 'Обучаете LoRA-модели под бренд/продукт' },
+        { id: 'ai_ref', label: 'Работаете с reference-картинками бренда' },
+        { id: 'ai_lipsync', label: 'Есть опыт с липсингом (синхронизация губ)' },
+      ]},
+      { title: 'Сроки', type: 'dual_text', fields: [
+        { id: 'ai_time_photo', label: 'Срок: фото-сет (5–10 изображений)', placeholder: 'напр. 1–2 дня' },
+        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'напр. 2–3 дня' },
+      ]},
+    ],
+    priceBlocks: [
+      { id: 'p_ai_photo', label: 'Фото-сет (5–10 фото одной сцены/продукта)' },
+      { id: 'p_ai_video', label: 'ИИ-видеоролик до 30 сек' },
+    ]
+  },
+  video: {
+    label: 'Видеооператор / монтажёр',
+    specBlocks: [
+      { title: 'Жанры работ (выбрать несколько)', type: 'multi', id: 'v_genres', options: ['Промо-ролики','Reels и Stories','Корпоративное видео','Образовательные ролики','Репортаж и мероприятия','Интервью','Таймлапс','Аэросъёмка','Свой вариант'] },
+      { title: 'Программы монтажа (выбрать несколько)', type: 'multi', id: 'v_soft', options: ['Premiere Pro','DaVinci Resolve','Final Cut','CapCut','After Effects','Свой вариант'] },
+      { title: 'Оборудование', type: 'fields', fields: [
+        { id: 'v_camera', label: 'Своя камера — да/нет, укажите модель', placeholder: 'напр. Sony A7 IV' },
+        { id: 'v_light', label: 'Своя светотехника', placeholder: 'да / нет' },
+        { id: 'v_drone', label: 'Дрон / аэросъёмка', placeholder: 'да / нет, модель' },
+      ]},
+      { title: 'Сроки', type: 'dual_text', fields: [
+        { id: 'v_time_reel', label: 'Срок: рилс / сторис 15–30 сек (съёмка + монтаж)', placeholder: 'напр. 1–2 дня' },
+        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'напр. 3–5 дней' },
+      ]},
+      { title: 'Работаете с ИИ-вставками в монтаже?', type: 'yesno', id: 'v_ai' },
+    ],
+    priceBlocks: [
+      { id: 'p_v_hour', label: '1 час съёмки' },
+      { id: 'p_v_day', label: 'Съёмочный день (8 ч)' },
+      { id: 'p_v_edit', label: 'Монтаж 1 мин готового ролика' },
+      { id: 'p_v_reel', label: 'Рилс / сторис 15–30 сек (съёмка + монтаж)' },
+    ]
+  },
+  motion: {
+    label: 'Моушн-дизайн',
+    specBlocks: [
+      { title: 'Программы (выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Motion','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
+      { title: 'Стиль анимации (выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
+      { title: 'Сроки по типу задачи', type: 'fields', fields: [
+        { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'напр. 1–2 дня' },
+        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'напр. 3–5 дней' },
+        { id: 'm_time_ai', label: 'ИИ-анимация 30 сек', placeholder: 'напр. 1–2 дня' },
+        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'напр. 5–10 дней' },
+      ]},
+    ],
+    priceBlocks: [
+      { id: 'p_m_2d', label: '2D-анимация 30 сек' },
+      { id: 'p_m_3d', label: '3D-анимация 30 сек' },
+      { id: 'p_m_ai', label: 'ИИ-анимация 30 сек' },
+    ]
+  },
+  design: {
+    label: 'Графический дизайн',
+    specBlocks: [
+      { title: 'Специализация (выбрать несколько)', type: 'multi', id: 'd_spec', options: ['Логотипы','Брендинг','Иллюстрации','Персонажи','Полиграфия','Сувенирка','Оформление соцсетей','Презентации','Маркетплейсы и карточки товаров','Свой вариант'] },
+      { title: 'Программы (выбрать несколько)', type: 'multi', id: 'd_soft', options: ['Figma','Adobe Illustrator','Photoshop','CorelDRAW','Canva','Используете ИИ (Midjourney, Firefly и др.)','Свой вариант'] },
+      { title: 'Сроки по типу задачи', type: 'dual_text', fields: [
+        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'напр. 3–5 дней' },
+        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'напр. 7–14 дней' },
+      ]},
+      { title: 'Готовите макеты в печать?', type: 'yesno', id: 'd_print' },
+    ],
+    priceBlocks: [
+      { id: 'p_d_logo', label: 'Логотип (3 варианта)' },
+      { id: 'p_d_brand', label: 'Брендбук' },
+      { id: 'p_d_banner', label: 'Баннер' },
+      { id: 'p_d_event', label: 'Комплект оформления площадки (баннеры, заставки, мерч, сувенирка)' },
+      { id: 'p_d_cards', label: '10 карточек товаров для маркетплейса' },
+      { id: 'p_d_mag', label: 'Макет журнала 30 страниц' },
+      { id: 'p_d_photo', label: 'Фотокнига 30 страниц' },
+    ]
+  },
+  web: {
+    label: 'Веб-разработка / вёрстка',
+    specBlocks: [
+      { title: 'Платформы и инструменты (выбрать несколько)', type: 'multi', id: 'w_soft', options: ['Tilda','Webflow','WordPress','Кастом HTML/CSS/JS','React','Vue','1С-Битрикс','Свой вариант'] },
+      { title: 'Дополнительные услуги', type: 'radio3', fields: [
+        { id: 'w_seo', label: 'SEO-базовая настройка' },
+        { id: 'w_crm', label: 'Подключение CRM / аналитики' },
+        { id: 'w_mob', label: 'Адаптивная вёрстка (мобильная)' },
+        { id: 'w_quiz', label: 'Квизы на сайте' },
+        { id: 'w_bot', label: 'Чат-бот для сайта' },
+      ]},
+    ],
+    priceBlocks: [
+      { id: 'p_w_land', label: 'Лендинг' },
+      { id: 'p_w_viz', label: 'Сайт-визитка 3–5 страниц' },
+      { id: 'p_w_corp', label: 'Корпоративный сайт' },
+      { id: 'p_w_cat', label: 'Каталог товаров' },
+      { id: 'p_w_shop', label: 'Интернет-магазин' },
+    ]
+  },
+  photo: {
+    label: 'Фотограф / ретушёр',
+    specBlocks: [
+      { title: 'Специализация (выбрать несколько)', type: 'multi', id: 'ph_spec', options: ['Предметная','Фудфото','Фэшн и одежда','Портретная','Репортаж и мероприятия','Интерьерная','Аэросъёмка (дрон)','Ретушь и обработка','Свой вариант'] },
+      { title: 'Оборудование', type: 'fields', fields: [
+        { id: 'ph_camera', label: 'Своя профессиональная камера — да/нет, укажите модель', placeholder: 'напр. Canon R6' },
+        { id: 'ph_studio', label: 'Своя студия', placeholder: 'да / нет' },
+      ]},
+      { title: 'Сроки', type: 'dual_text', fields: [
+        { id: 'ph_time', label: 'Срок сдачи обработанных фото после съёмки', placeholder: 'напр. 2–3 дня' },
+        { id: 'ph_retouch_time', label: 'Срок ретуши 1 фото', placeholder: 'напр. 1–2 часа' },
+      ]},
+    ],
+    priceBlocks: [
+      { id: 'p_ph_hour', label: '1 час съёмки' },
+      { id: 'p_ph_day', label: 'Съёмочный день (8 ч)' },
+      { id: 'p_ph_ret', label: 'Ретушь 1 фото' },
+    ]
+  },
+  smm: {
+    label: 'SMM / Контент-менеджер',
+    specBlocks: [
+      { title: 'Платформы (выбрать несколько)', type: 'multi', id: 'smm_plat', options: ['ВКонтакте','Telegram','MAX','Instagram*','TikTok*','YouTube','Дзен','RuTube','Свой вариант'] },
+      { title: 'Навыки (выбрать несколько)', type: 'multi', id: 'smm_skills', options: ['Написание текстов','Создание визуала','Монтаж reels и видео','Фото для постов','Сторис-контент','Разработка контент-плана','Разработка SMM-стратегии','Ведение комьюнити и ответы','Работа с отзывами','Свой вариант'] },
+      { title: 'Реклама и продвижение (выбрать несколько)', type: 'multi', id: 'smm_ads', options: ['Таргет ВКонтакте','Яндекс.Директ','Посевы в Telegram','Работа с блогерами','Коллаборации','Свой вариант'] },
+      { title: 'Инструменты (выбрать несколько)', type: 'multi', id: 'smm_tools', options: ['SMMplanner','Publer','TGStat','VK Analytics','Яндекс.Метрика','Canva','Figma','ИИ (ChatGPT, Claude и др.)','Свой вариант'] },
+      { title: 'Формат сотрудничества (выбрать несколько)', type: 'multi', id: 'smm_format', options: ['Полный SMM-пакет','Только тексты','Только визуал','Только таргет','Разовые задачи'] },
+      { title: 'Кол-во постов в месяц, которые готовы(а) закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'напр. 12–16 постов' },
+      { title: 'Готовы(а) к долгосрочному сотрудничеству?', type: 'yesno', id: 'smm_longterm' },
+      { title: 'Есть опыт в нише: digital, творческие студии, образование?', type: 'yesno', id: 'smm_exp' },
+    ],
+    priceBlocks: [
+      { id: 'p_smm_full', label: 'Ведение одного клиента в месяц (полный пакет)' },
+      { id: 'p_smm_target', label: 'Настройка и ведение таргета в месяц' },
+    ]
+  },
+  bot: {
+    label: 'Разработка чат-ботов',
+    specBlocks: [
+      { title: 'Платформы (выбрать несколько)', type: 'multi', id: 'bot_plat', options: ['Telegram','ВКонтакте','MAX','WhatsApp*','Viber','Сайт (виджет)','Свой вариант'] },
+      { title: 'Тип разработки (выбрать несколько)', type: 'multi', id: 'bot_type', options: ['No-code конструктор (BotHelp, SaleBot, PuzzleBot, Senler)','Кастомный код (Python, Node.js)','Telegram Mini App','Свой вариант'] },
+      { title: 'Типы ботов, которые умеете делать (выбрать несколько)', type: 'multi', id: 'bot_kinds', options: ['Бот-визитка','FAQ-бот','Лид-бот (сбор заявок)','Квиз-бот','Бот-воронка (автоворонка продаж)','Бот-рассылка (прогрев, цепочки)','Бот-поддержка (первая линия)','Бот-каталог','Бот с оплатой','AI-бот (GPT/Claude)','Гибридный бот (сценарий + AI)','Telegram Mini App','Свой вариант'] },
+      { title: 'Интеграции (выбрать несколько)', type: 'multi', id: 'bot_int', options: ['AmoCRM','Битрикс24','GetCourse','Google Sheets','ЮMoney','Telegram Payments','Albato','Make (Integromat)','Собственный API','Свой вариант'] },
+      { title: 'Навыки', type: 'radio3', fields: [
+        { id: 'bot_script', label: 'Пишете сценарии и диалоговые скрипты' },
+        { id: 'bot_ai', label: 'Подключаете GPT / Claude (AI-ответы)' },
+        { id: 'bot_seg', label: 'Настраиваете рассылки и сегментацию базы' },
+        { id: 'bot_anal', label: 'Делаете аналитику и отчёты по боту' },
+      ]},
+      { title: 'Сроки по типу задачи', type: 'fields', fields: [
+        { id: 'bot_time_simple', label: 'Простой бот (FAQ / лид-бот)', placeholder: 'напр. 1–3 дня' },
+        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'напр. 5–10 дней' },
+        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'напр. 10–20 дней' },
+      ]},
+    ],
+    priceBlocks: [
+      { id: 'p_bot_simple', label: 'Простой бот (FAQ / лид-бот / визитка)' },
+      { id: 'p_bot_funnel', label: 'Бот-воронка с рассылками и сегментацией' },
+      { id: 'p_bot_ai', label: 'AI-бот на базе GPT/Claude' },
+      { id: 'p_bot_mini', label: 'Telegram Mini App' },
+      { id: 'p_bot_support', label: 'Техподдержка и доработки (в месяц)' },
+    ]
+  }
+};
+
+// ─── STEP 1 ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.dir-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDir = btn.dataset.dir;
+  });
+});
+
+function goStep2() {
+  // validate step 1
+  let ok = true;
+  if (!document.getElementById('f-name').value.trim()) { showErr('e-name'); ok = false; } else hideErr('e-name');
+  if (!document.getElementById('f-contact').value.trim()) { showErr('e-contact'); ok = false; } else hideErr('e-contact');
+  if (!document.getElementById('f-tz').value) { showErr('e-tz'); ok = false; } else hideErr('e-tz');
+  if (!selectedDir) { showErr('e-dir'); ok = false; } else hideErr('e-dir');
+  if (!ok) return;
+
+  // build spec fields
+  const d = DIRS[selectedDir];
+  document.getElementById('geo-block').style.display = GEO_DIRS.includes(selectedDir) ? '' : 'none';
+  buildSpecFields(d.specBlocks);
+
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = '';
+  setStep(2);
+}
+
+function goStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = '';
+  setStep(1);
+}
+
+// ─── STEP 2 ───────────────────────────────────────────────────────────────────
+function goStep3() {
+  // geo validation
+  if (GEO_DIRS.includes(selectedDir)) {
+    const cv = document.getElementById('f-city-val').value;
+    const cc = document.getElementById('f-city-custom').value.trim();
+    if (!cv && !cc) { showErr('e-city'); return; }
+    hideErr('e-city');
+  }
+
+  // build price fields
+  const d = DIRS[selectedDir];
+  buildPriceFields(d.priceBlocks);
+
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = '';
+  setStep(3);
+}
+
+function goStep2b() {
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('step2').style.display = '';
+  setStep(2);
+}
+
+// ─── BUILD FIELDS ─────────────────────────────────────────────────────────────
+function buildSpecFields(blocks) {
+  const container = document.getElementById('spec-fields');
+  container.innerHTML = '';
+  blocks.forEach(block => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    let html = `<div class="section-title">${block.title}</div>`;
+
+    if (block.type === 'multi') {
+      html += `<div class="check-grid" id="cg_${block.id}">`;
+      block.options.forEach((opt, i) => {
+        html += `<label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="${block.id}" value="${opt}"><div class="check-box"></div>${opt}</label>`;
+      });
+      html += '</div>';
+    } else if (block.type === 'yesno') {
+      html += `<div class="radio-group">
+        <label class="radio-item" onclick="toggleRadio(this, '${block.id}')"><input type="radio" name="${block.id}" value="Да"><div class="radio-dot"></div>Да</label>
+        <label class="radio-item" onclick="toggleRadio(this, '${block.id}')"><input type="radio" name="${block.id}" value="Нет"><div class="radio-dot"></div>Нет</label>
+      </div>`;
+    } else if (block.type === 'radio3') {
+      block.fields.forEach(f => {
+        html += `<div class="field"><label class="field-label">${f.label}</label><div class="radio-group">
+          <label class="radio-item" onclick="toggleRadio(this,'${f.id}')"><input type="radio" name="${f.id}" value="Да"><div class="radio-dot"></div>Да</label>
+          <label class="radio-item" onclick="toggleRadio(this,'${f.id}')"><input type="radio" name="${f.id}" value="Нет"><div class="radio-dot"></div>Нет</label>
+        </div></div>`;
+      });
+    } else if (block.type === 'fields') {
+      block.fields.forEach(f => {
+        html += `<div class="field"><label class="field-label">${f.label}</label><input type="text" id="${f.id}" placeholder="${f.placeholder||''}"></div>`;
+      });
+    } else if (block.type === 'dual_text') {
+      block.fields.forEach(f => {
+        html += `<div class="field"><label class="field-label">${f.label}</label><input type="text" id="${f.id}" placeholder="${f.placeholder||''}"></div>`;
+      });
+    } else if (block.type === 'single_text') {
+      html += `<div class="field"><input type="text" id="${block.id}" placeholder="${block.placeholder||''}"></div>`;
+    }
+
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+}
+
+function buildPriceFields(blocks) {
+  const container = document.getElementById('price-fields');
+  container.innerHTML = '';
+  if (!blocks || blocks.length === 0) return;
+  const card = document.createElement('div');
+  card.className = 'card';
+  let html = '<div class="section-title">Стоимость (ценовая вилка, ₽)</div>';
+  blocks.forEach(b => {
+    html += `<div class="field">
+      <label class="field-label">${b.label}</label>
+      <div class="price-row">
+        <input type="text" id="${b.id}_from" placeholder="от">
+        <div class="price-sep">—</div>
+        <input type="text" id="${b.id}_to" placeholder="до">
+      </div>
+    </div>`;
+  });
+  card.innerHTML = html;
+  container.appendChild(card);
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.querySelector('input').checked = el.classList.contains('checked');
+}
+function toggleRadio(el, name) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i => i.closest('.radio-item').classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+function showErr(id) { document.getElementById(id).classList.add('show'); }
+function hideErr(id) { document.getElementById(id).classList.remove('show'); }
+
+function setStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('s' + i);
+    if (i < n) { el.className = 'step-num done'; el.textContent = '✓'; }
+    else if (i === n) { el.className = 'step-num active'; el.textContent = i; }
+    else { el.className = 'step-num'; el.textContent = i; }
+    if (i < 3) document.getElementById('sl' + i).className = 'step-line' + (i < n ? ' done' : '');
+  }
+  document.getElementById('progress').style.width = (n / 3 * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── CITY AUTOCOMPLETE (Dadata) ───────────────────────────────────────────────
+function cityInput() {
+  const q = document.getElementById('f-city').value.trim();
+  clearTimeout(cityTimer);
+  document.getElementById('f-city-val').value = '';
+  if (q.length < 2) { closeCityList(); return; }
+  cityTimer = setTimeout(() => fetchCities(q), 300);
+}
+
+async function fetchCities(q) {
+  const list = document.getElementById('city-list');
+  list.innerHTML = '<div class="autocomplete-loader">Поиск...</div>';
+  list.classList.add('open');
+  try {
+    const res = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Token ' + DADATA_TOKEN },
+      body: JSON.stringify({ query: q, count: 8, from_bound: { value: 'city' }, to_bound: { value: 'settlement' }, locations: [{ country: 'ru' }] })
+    });
+    const data = await res.json();
+    renderCityList(data.suggestions || []);
+  } catch(e) {
+    list.innerHTML = '<div class="autocomplete-loader">Ошибка загрузки. Введите вручную.</div>';
+    setTimeout(showCityCustom, 1500);
+  }
+}
+
+function renderCityList(items) {
+  const list = document.getElementById('city-list');
+  list.innerHTML = '';
+  if (items.length === 0) {
+    const d = document.createElement('div');
+    d.className = 'autocomplete-item special';
+    d.textContent = 'Не найдено — ввести вручную';
+    d.onclick = showCityCustom;
+    list.appendChild(d);
+  } else {
+    items.forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'autocomplete-item';
+      d.textContent = item.value;
+      d.onclick = () => {
+        document.getElementById('f-city').value = item.value;
+        document.getElementById('f-city-val').value = item.value;
+        document.getElementById('city-custom-wrap').style.display = 'none';
+        closeCityList();
+      };
+      list.appendChild(d);
+    });
+    const extra = document.createElement('div');
+    extra.className = 'autocomplete-item special';
+    extra.textContent = 'Нет в списке — ввести вручную';
+    extra.onclick = showCityCustom;
+    list.appendChild(extra);
+  }
+  list.classList.add('open');
+}
+
+function showCityCustom() {
+  closeCityList();
+  document.getElementById('f-city').value = '';
+  document.getElementById('f-city-val').value = '';
+  document.getElementById('city-custom-wrap').style.display = '';
+  document.getElementById('f-city-custom').focus();
+}
+function closeCityList() {
+  document.getElementById('city-list').classList.remove('open');
+  document.getElementById('city-list').innerHTML = '';
+}
+document.addEventListener('click', e => { if (!e.target.closest('.autocomplete-wrap')) closeCityList(); });
+
+// ─── COLLECT DATA ─────────────────────────────────────────────────────────────
+function collectData() {
+  const d = DIRS[selectedDir];
+  const data = {
+    direction: d.label,
+    name: document.getElementById('f-name').value.trim(),
+    contact: document.getElementById('f-contact').value.trim(),
+    timezone: document.getElementById('f-tz').value,
+    city: document.getElementById('f-city-val').value || document.getElementById('f-city-custom').value.trim() || '',
+    portfolio: document.getElementById('f-portfolio').value.trim(),
+    comment: document.getElementById('f-comment').value.trim(),
+  };
+
+  // spec fields
+  d.specBlocks.forEach(block => {
+    if (block.type === 'multi') {
+      const checked = [...document.querySelectorAll(`input[name="${block.id}"]:checked`)].map(i => i.value);
+      data[block.id] = checked.join(', ');
+    } else if (block.type === 'yesno') {
+      const v = document.querySelector(`input[name="${block.id}"]:checked`);
+      data[block.id] = v ? v.value : '';
+    } else if (block.type === 'radio3') {
+      block.fields.forEach(f => {
+        const v = document.querySelector(`input[name="${f.id}"]:checked`);
+        data[f.id] = v ? v.value : '';
+      });
+    } else if (block.type === 'fields' || block.type === 'dual_text') {
+      block.fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        data[f.id] = el ? el.value.trim() : '';
+      });
+    } else if (block.type === 'single_text') {
+      const el = document.getElementById(block.id);
+      data[block.id] = el ? el.value.trim() : '';
+    }
+  });
+
+  // price fields
+  d.priceBlocks.forEach(b => {
+    const f = document.getElementById(b.id + '_from');
+    const t = document.getElementById(b.id + '_to');
+    data[b.id] = (f && t) ? (f.value.trim() + ' — ' + t.value.trim()) : '';
+  });
+
+  return data;
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+async function submitForm() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Отправляем...';
+
+  const payload = collectData();
+
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    document.getElementById('main-form').style.display = 'none';
+    document.getElementById('steps').style.display = 'none';
+    document.querySelector('.progress-bar').style.display = 'none';
+    document.getElementById('success-screen').style.display = '';
+    document.querySelector('.header').style.display = 'none';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Отправить анкету ✓';
+    alert('Ошибка отправки. Проверьте соединение и попробуйте снова.');
+  }
+}
+</script>
+</body>
+</html>
