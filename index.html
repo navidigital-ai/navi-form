@@ -295,24 +295,55 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .submit-btn:active { transform: scale(0.99); }
 .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Success screen */
+/* Success screen — фиксированная карточка по центру */
 .success-screen {
   display: none;
-  text-align: center;
-  padding: 60px 20px;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
-.success-icon { font-size: 56px; margin-bottom: 20px; }
+.success-screen.visible { display: flex; }
+.success-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,15,0.88);
+  backdrop-filter: blur(8px);
+}
+.success-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--border-hover);
+  border-radius: 20px;
+  padding: 48px 36px;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(124,108,250,0.25);
+  animation: cardPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes cardPop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.success-icon { font-size: 64px; margin-bottom: 20px; line-height: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
 .success-title {
   font-family: 'Unbounded', sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   background: linear-gradient(135deg, var(--success), #86efac);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.success-text { font-size: 15px; color: var(--text2); line-height: 1.6; }
+.success-text { font-size: 16px; color: var(--text2); line-height: 1.7; }
 
 /* Error message */
 .field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
@@ -335,87 +366,11 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
-/* Neon Cat Overlay */
-.cat-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  pointer-events: none;
-  opacity: 0;
-}
-.cat-overlay.show {
-  animation: catAppear 4s ease-in-out forwards;
-}
-@keyframes catAppear {
-  0%   { opacity: 0; }
-  8%   { opacity: 1; }
-  15%  { opacity: 1; }
-  75%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-.cat-overlay .cat-bg {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, rgba(30,0,60,0.92) 0%, rgba(0,0,0,0) 70%);
-  opacity: 0;
-}
-.cat-overlay.show .cat-bg {
-  animation: bgPulse 4s ease-in-out forwards;
-}
-@keyframes bgPulse {
-  0%   { opacity: 0; }
-  10%  { opacity: 1; }
-  75%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-.cat-overlay .cat-face {
-  position: relative;
-  width: min(90vw, 90vh);
-  height: min(90vw, 90vh);
-  transform: scale(0.05);
-  opacity: 0;
-}
-.cat-overlay.show .cat-face {
-  animation: catZoom 4s ease-in-out forwards;
-}
-@keyframes catZoom {
-  0%   { transform: scale(0.05); opacity: 0; }
-  15%  { transform: scale(0.6);  opacity: 1; }
-  30%  { transform: scale(0.85); opacity: 1; }
-  50%  { transform: scale(0.9);  opacity: 1; }
-  75%  { transform: scale(0.88); opacity: 1; }
-  100% { transform: scale(0.05); opacity: 0; }
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%) translateY(120px);
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.5;
-  padding: 14px 24px;
-  border-radius: var(--radius);
-  max-width: 420px;
-  width: calc(100% - 40px);
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(124,108,250,0.35);
-  z-index: 999;
-  opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
-  pointer-events: none;
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+/* Success cat — лёгкое покачивание */
+.success-cat { animation: catBob 2.5s ease-in-out infinite; }
+@keyframes catBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
 }
 
 .custom-option-wrap { padding: 4px 0 2px; }
@@ -598,56 +553,53 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 
   <!-- Success -->
   <div class="success-screen" id="success-screen">
-    <div class="success-icon">✦</div>
-    <div class="success-title">Анкета отправлена!</div>
-    <p class="success-text">Спасибо! Мы уже сохранили вашу анкету.<br>Первое письмо с потенциальным проектом может прилететь уже скоро 😉</p>
+    <div class="success-card">
+      <div class="success-cat" id="success-cat">
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:160px;height:160px;display:block;margin:0 auto 8px">
+          <defs>
+            <filter id="glow-strong"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glow-soft"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <g filter="url(#glow-strong)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="200" cy="215" rx="155" ry="140" stroke="#9333ea" stroke-width="3"/>
+            <polygon points="80,105 45,25 130,90" stroke="#a855f7" stroke-width="3"/>
+            <polygon points="320,105 355,25 270,90" stroke="#a855f7" stroke-width="3"/>
+            <polygon points="82,100 58,40 122,88" stroke="#f0abfc" stroke-width="2"/>
+            <polygon points="318,100 342,40 278,88" stroke="#f0abfc" stroke-width="2"/>
+            <ellipse cx="145" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
+            <ellipse cx="145" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
+            <circle cx="133" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
+            <ellipse cx="255" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
+            <ellipse cx="255" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
+            <circle cx="243" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
+            <polygon points="200,265 187,282 213,282" stroke="#ec4899" stroke-width="2.5"/>
+            <path d="M187,282 Q175,296 165,290" stroke="#db2777" stroke-width="2.5"/>
+            <path d="M213,282 Q225,296 235,290" stroke="#db2777" stroke-width="2.5"/>
+            <g filter="url(#glow-soft)">
+              <path stroke="#f43f5e" stroke-width="7" fill="none">
+                <animate attributeName="d" dur="0.55s" repeatCount="indefinite"
+                  values="M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368;
+                          M192,288 Q200,310 200,330 Q200,358 190,370 Q185,376 190,384;
+                          M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368"/>
+              </path>
+              <ellipse cx="193" cy="370" rx="10" ry="7" stroke="#f43f5e" stroke-width="2">
+                <animate attributeName="cy" dur="0.55s" repeatCount="indefinite" values="366;382;366"/>
+              </ellipse>
+            </g>
+            <line x1="30"  y1="248" x2="165" y2="268" stroke="#6d28d9" stroke-width="2"/>
+            <line x1="20"  y1="270" x2="163" y2="278" stroke="#6d28d9" stroke-width="2"/>
+            <line x1="30"  y1="292" x2="165" y2="288" stroke="#6d28d9" stroke-width="2"/>
+            <line x1="370" y1="248" x2="235" y2="268" stroke="#6d28d9" stroke-width="2"/>
+            <line x1="380" y1="270" x2="237" y2="278" stroke="#6d28d9" stroke-width="2"/>
+            <line x1="370" y1="292" x2="235" y2="288" stroke="#6d28d9" stroke-width="2"/>
+          </g>
+        </svg>
+      </div>
+      <div class="success-title">Анкета отправлена!</div>
+      <p class="success-text">Спасибо! Мы уже сохранили вашу анкету.<br><br>Первое письмо с потенциальным проектом может прилететь уже скоро 😉</p>
+    </div>
   </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast">Спасибо! Мы уже сохранили вашу анкету. Первое письмо с потенциальным проектом может прилететь уже скоро 😉</div>
-  <!-- Neon Cat Overlay -->
-  <div class="cat-overlay" id="neon-cat">
-    <div class="cat-bg"></div>
-    <svg class="cat-face" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="glow-strong"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="glow-soft"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      <g filter="url(#glow-strong)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <ellipse cx="200" cy="215" rx="155" ry="140" stroke="#9333ea" stroke-width="3"/>
-        <polygon points="80,105 45,25 130,90" stroke="#a855f7" stroke-width="3"/>
-        <polygon points="320,105 355,25 270,90" stroke="#a855f7" stroke-width="3"/>
-        <polygon points="82,100 58,40 122,88" stroke="#f0abfc" stroke-width="2"/>
-        <polygon points="318,100 342,40 278,88" stroke="#f0abfc" stroke-width="2"/>
-        <ellipse cx="145" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
-        <ellipse cx="145" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
-        <circle cx="133" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
-        <ellipse cx="255" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
-        <ellipse cx="255" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
-        <circle cx="243" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
-        <polygon points="200,265 187,282 213,282" stroke="#ec4899" stroke-width="2.5"/>
-        <path d="M187,282 Q175,296 165,290" stroke="#db2777" stroke-width="2.5"/>
-        <path d="M213,282 Q225,296 235,290" stroke="#db2777" stroke-width="2.5"/>
-        <g filter="url(#glow-soft)">
-          <path stroke="#f43f5e" stroke-width="7" fill="none">
-            <animate attributeName="d" dur="0.55s" repeatCount="indefinite"
-              values="M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368;
-                      M192,288 Q200,310 200,330 Q200,358 190,370 Q185,376 190,384;
-                      M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368"/>
-          </path>
-          <ellipse cx="193" cy="370" rx="10" ry="7" stroke="#f43f5e" stroke-width="2">
-            <animate attributeName="cy" dur="0.55s" repeatCount="indefinite" values="366;382;366"/>
-          </ellipse>
-        </g>
-        <line x1="30"  y1="248" x2="165" y2="268" stroke="#6d28d9" stroke-width="2"/>
-        <line x1="20"  y1="270" x2="163" y2="278" stroke="#6d28d9" stroke-width="2"/>
-        <line x1="30"  y1="292" x2="165" y2="288" stroke="#6d28d9" stroke-width="2"/>
-        <line x1="370" y1="248" x2="235" y2="268" stroke="#6d28d9" stroke-width="2"/>
-        <line x1="380" y1="270" x2="237" y2="278" stroke="#6d28d9" stroke-width="2"/>
-        <line x1="370" y1="292" x2="235" y2="288" stroke="#6d28d9" stroke-width="2"/>
-      </g>
-    </svg>
-  </div>
 
 </div>
 
@@ -1228,20 +1180,9 @@ async function submitForm() {
     document.getElementById('main-form').style.display = 'none';
     document.getElementById('steps').style.display = 'none';
     document.querySelector('.progress-bar').style.display = 'none';
-    document.getElementById('success-screen').style.display = '';
     document.querySelector('.header').style.display = 'none';
-
-    // Toast
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 5000);
-
-    // Кот появляется через 3 секунды
-    setTimeout(() => {
-      const cat = document.getElementById('neon-cat');
-      cat.classList.add('show');
-      setTimeout(() => cat.classList.remove('show'), 4000);
-    }, 3000);
+    // Показываем карточку с котом по центру (остаётся на экране)
+    document.getElementById('success-screen').classList.add('visible');
 
   } catch(e) {
     btn.disabled = false;
