@@ -1181,7 +1181,7 @@ function startNeonTunnel() {
     return {
       angle,
       dist: initial ? Math.random() * Math.max(W, H) * 0.6 : Math.random() * 12 + 2,
-      speed: Math.random() * 1.5 + 1.0,
+      speed: Math.random() * 2.5 + 2.0,
       len: Math.random() * 70 + 40,
       width: Math.random() * 2.2 + 0.8,
       color: COLORS[(Math.random() * COLORS.length) | 0],
@@ -1200,7 +1200,7 @@ function startNeonTunnel() {
     const maxDist = Math.max(W, H) * 0.8;
     for (const r of rays) {
       // плавный экспоненциальный разгон: чем дальше — тем быстрее, к краям ускоряется
-      r.dist += r.speed * (1 + Math.pow(r.dist / maxDist, 1.8) * 9);
+      r.dist += r.speed * (1 + Math.pow(r.dist / maxDist, 1.8) * 20);
       const scale = r.dist / maxDist;
 
       // хвост луча растёт со скоростью — длинные полосы у краёв
