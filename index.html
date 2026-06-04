@@ -357,6 +357,10 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   transform: translateX(-50%) translateY(0);
 }
 
+.custom-option-wrap { padding: 4px 0 2px; }
+.custom-option-inp { width: 100%; font-size: 13px; padding: 8px 12px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--bg3); color: var(--text); font-family: 'Golos Text', sans-serif; }
+.custom-option-inp:focus { outline: none; box-shadow: 0 0 0 3px rgba(124,108,250,0.15); }
+
 /* Responsive */
 @media(max-width:480px) {
   .card { padding: 20px 16px; }
@@ -377,7 +381,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>НАВИ · Digital Studio</div>
     <h1>База крутых ребят</h1>
-    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш закрытый список специалистов.<br><br><span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span><br><br>Как только появится проект, который идеально подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
+    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш закрытый список специалистов. <span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span> Как только появится проект, который идеально подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
   </div>
 
   <!-- Steps -->
@@ -404,9 +408,13 @@ input.error, textarea.error, select.error { border-color: var(--error); }
         <div class="field-error" id="e-name">Пожалуйста, укажите имя</div>
       </div>
       <div class="field">
-        <label class="field-label">Telegram или телефон <span class="req">обязательно</span></label>
-        <input type="text" id="f-contact" placeholder="@username или +7...">
-        <div class="field-error" id="e-contact">Укажите Telegram или телефон</div>
+        <label class="field-label">Телефон <span class="req">обязательно</span></label>
+        <input type="tel" id="f-phone" placeholder="+7 (___) ___-__-__" maxlength="18" oninput="formatPhone(this)">
+        <div class="field-error" id="e-phone">Укажите номер телефона</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Telegram <span style="font-size:11px;color:var(--text3)">необязательно</span></label>
+        <input type="text" id="f-tg" placeholder="@username">
       </div>
       <div class="field">
         <label class="field-label">Часовой пояс <span class="req">обязательно</span></label>
@@ -541,7 +549,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // ЗАМЕНИТЕ на ваши значения:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXVnKrDzM5fSNobPEpPBcwHR9bBXnZc-GRclmgYcWE2MOswUDDzNFig_lGJuWuojuA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSg-NJFmpAQ-mxXhNWRJjuLZKtr1rMfmZ6EHgHNRBnWLjwusCpN31BSo6mYANR0hpg/exec';
 const DADATA_TOKEN = 'edbce6e7ea5643553d7e45efeb67c8247e3e353f';
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -735,7 +743,7 @@ function goStep2() {
   // validate step 1
   let ok = true;
   if (!document.getElementById('f-name').value.trim()) { showErr('e-name'); ok = false; } else hideErr('e-name');
-  if (!document.getElementById('f-contact').value.trim()) { showErr('e-contact'); ok = false; } else hideErr('e-contact');
+  if (!document.getElementById('f-phone').value.trim() || document.getElementById('f-phone').value.replace(/\D/g,'').length < 11) { showErr('e-phone'); ok = false; } else hideErr('e-phone');
   if (!document.getElementById('f-tz').value) { showErr('e-tz'); ok = false; } else hideErr('e-tz');
   if (!selectedDir) { showErr('e-dir'); ok = false; } else hideErr('e-dir');
   if (!ok) return;
@@ -807,8 +815,11 @@ function buildSpecFields(blocks) {
 
     if (block.type === 'multi') {
       html += `<div class="check-grid" id="cg_${block.id}">`;
-      block.options.forEach((opt, i) => {
-        html += `<label class="check-item" ><input type="checkbox" name="${block.id}" value="${opt}" onchange="syncCheck(this)"><div class="check-box"></div>${opt}</label>`;
+      block.options.forEach((opt) => {
+        html += `<label class="check-item"><input type="checkbox" name="${block.id}" value="${opt}" onchange="syncCheck(this)"><div class="check-box"></div>${opt}</label>`;
+        if (opt === 'Свой вариант') {
+          html += `<div class="custom-option-wrap" style="display:none;grid-column:1/-1"><input type="text" class="custom-option-inp" data-for="${block.id}" placeholder="Введите свой вариант..."></div>`;
+        }
       });
       html += '</div>';
     } else if (block.type === 'yesno') {
@@ -868,9 +879,29 @@ function buildPriceFields(blocks) {
 }
 
 // ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function formatPhone(inp) {
+  let v = inp.value.replace(/\D/g, '');
+  if (v.startsWith('8')) v = '7' + v.slice(1);
+  if (!v.startsWith('7') && v.length > 0) v = '7' + v;
+  v = v.slice(0, 11);
+  let out = '';
+  if (v.length > 0) out = '+' + v[0];
+  if (v.length > 1) out += ' (' + v.slice(1, 4);
+  if (v.length >= 4) out += ') ' + v.slice(4, 7);
+  if (v.length >= 7) out += '-' + v.slice(7, 9);
+  if (v.length >= 9) out += '-' + v.slice(9, 11);
+  inp.value = out;
+}
+
 function syncCheck(inp) {
-  const label = inp.closest(".check-item");
-  label.classList.toggle("checked", inp.checked);
+  const label = inp.closest('.check-item');
+  label.classList.toggle('checked', inp.checked);
+  // Показываем поле ввода для "Свой вариант"
+  const customWrap = label.nextElementSibling;
+  if (customWrap && customWrap.classList.contains('custom-option-wrap')) {
+    customWrap.style.display = inp.checked ? '' : 'none';
+    if (!inp.checked) customWrap.querySelector('input').value = '';
+  }
 }
 function toggleCheck(el) {
   el.classList.toggle('checked');
@@ -973,7 +1004,8 @@ function collectData() {
   const data = {
     direction: d.label,
     name: document.getElementById('f-name').value.trim(),
-    contact: document.getElementById('f-contact').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    tg: document.getElementById('f-tg').value.trim(),
     timezone: document.getElementById('f-tz').value,
     city: document.getElementById('f-city-val').value || document.getElementById('f-city-custom').value.trim() || '',
     portfolio: document.getElementById('f-portfolio').value.trim(),
@@ -987,7 +1019,13 @@ function collectData() {
   // spec fields
   d.specBlocks.forEach(block => {
     if (block.type === 'multi') {
-      const checked = [...document.querySelectorAll(`input[name="${block.id}"]:checked`)].map(i => i.value);
+      const checked = [...document.querySelectorAll(`input[name="${block.id}"]:checked`)].map(i => {
+        if (i.value === 'Свой вариант') {
+          const customInp = document.querySelector(`.custom-option-inp[data-for="${block.id}"]`);
+          return customInp && customInp.value.trim() ? customInp.value.trim() : 'Свой вариант';
+        }
+        return i.value;
+      });
       data[block.id] = checked.join(', ');
     } else if (block.type === 'yesno') {
       const v = document.querySelector(`input[name="${block.id}"]:checked`);
