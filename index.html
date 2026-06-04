@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>НАВИ — База фрилансеров</title>
+<title>НАВИ — База крутых ребят</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
@@ -82,6 +82,13 @@ h1 {
   background-clip: text;
 }
 .subtitle { font-size: 15px; color: var(--text2); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+.subtitle-highlight {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
 
 /* Step indicator */
 .steps {
@@ -203,7 +210,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 }
 .check-item:hover { border-color: var(--border-hover); }
 .check-item.checked { border-color: var(--accent); color: var(--text); background: rgba(124,108,250,0.08); }
-.check-item input[type=checkbox] { display: none; }
+.check-item input[type=checkbox] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
 .check-box {
   width: 16px; height: 16px; flex-shrink: 0;
   border: 1.5px solid var(--text3);
@@ -323,6 +330,33 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 14px 24px;
+  border-radius: var(--radius);
+  max-width: 420px;
+  width: calc(100% - 40px);
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(124,108,250,0.35);
+  z-index: 999;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Responsive */
 @media(max-width:480px) {
   .card { padding: 20px 16px; }
@@ -342,8 +376,8 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   <!-- Header -->
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>НАВИ · Digital Studio</div>
-    <h1>База фрилансеров</h1>
-    <p class="subtitle">Заполните анкету — мы добавим вас в нашу базу и будем обращаться, когда появится подходящий заказ</p>
+    <h1>База крутых ребят</h1>
+    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш закрытый список специалистов.<br><br><span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span><br><br>Как только появится проект, который идеально подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
   </div>
 
   <!-- Steps -->
@@ -496,15 +530,18 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   <div class="success-screen" id="success-screen">
     <div class="success-icon">✦</div>
     <div class="success-title">Анкета отправлена!</div>
-    <p class="success-text">Спасибо! Мы добавили вас в базу НАВИ.<br>Когда появится подходящий проект — напишем вам.</p>
+    <p class="success-text">Спасибо! Мы уже сохранили вашу анкету.<br>Первое письмо с потенциальным проектом может прилететь уже скоро 😉</p>
   </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Спасибо! Мы уже сохранили вашу анкету. Первое письмо с потенциальным проектом может прилететь уже скоро 😉</div>
 
 </div>
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // ЗАМЕНИТЕ на ваши значения:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTgvF9c-X_t8TlGafOOXHxny61cIWmHl-x7F0JD44XMpsZFuDPDiWH9yybgb4ZnEpe/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXVnKrDzM5fSNobPEpPBcwHR9bBXnZc-GRclmgYcWE2MOswUDDzNFig_lGJuWuojuA/exec';
 const DADATA_TOKEN = 'edbce6e7ea5643553d7e45efeb67c8247e3e353f';
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -519,18 +556,18 @@ const DIRS = {
   ai: {
     label: 'ИИ-генерация фото/видео',
     specBlocks: [
-      { title: 'Фото-генераторы (выбрать несколько)', type: 'multi', id: 'ai_photo_tools', options: ['Midjourney','Stable Diffusion','DALL·E','Flux','Adobe Firefly','Nanobanana','Свой вариант'] },
-      { title: 'Видео-генераторы (выбрать несколько)', type: 'multi', id: 'ai_video_tools', options: ['Runway','Kling','Sora','Hailuo','Pika','Свой вариант'] },
-      { title: 'Аудио-инструменты (выбрать несколько)', type: 'multi', id: 'ai_audio_tools', options: ['Udio','Suno','ElevenLabs','Свой вариант'] },
-      { title: 'Направленность ИИ-контента (выбрать несколько)', type: 'multi', id: 'ai_scope', options: ['Товарные фото','Фудфото','Фэшн-лукбуки','Портреты и модели','Рекламные визуализации','ИИ-видеоролики','Аватары и персонажи','Реставрация фото','Оживление фото','Стилизация','Липсинг (lip sync)','Свой вариант'] },
+      { title: 'Фото-генераторы (можно выбрать несколько)', type: 'multi', id: 'ai_photo_tools', options: ['Midjourney','Stable Diffusion','DALL·E','Flux','Adobe Firefly','Nanobanana','Свой вариант'] },
+      { title: 'Видео-генераторы (можно выбрать несколько)', type: 'multi', id: 'ai_video_tools', options: ['Runway','Kling','Sora','Hailuo','Pika','Свой вариант'] },
+      { title: 'Аудио-инструменты (можно выбрать несколько)', type: 'multi', id: 'ai_audio_tools', options: ['Udio','Suno','ElevenLabs','Свой вариант'] },
+      { title: 'Направленность ИИ-контента (можно выбрать несколько)', type: 'multi', id: 'ai_scope', options: ['Товарные фото','Фудфото','Фэшн-лукбуки','Портреты и модели','Рекламные визуализации','ИИ-видеоролики','Аватары и персонажи','Реставрация фото','Оживление фото','Стилизация','Липсинг (lip sync)','Свой вариант'] },
       { title: 'Продвинутые навыки', type: 'radio3', fields: [
         { id: 'ai_lora', label: 'Обучаете LoRA-модели под бренд/продукт' },
         { id: 'ai_ref', label: 'Работаете с reference-картинками бренда' },
         { id: 'ai_lipsync', label: 'Есть опыт с липсингом (синхронизация губ)' },
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
-        { id: 'ai_time_photo', label: 'Срок: фото-сет (5–10 изображений)', placeholder: 'напр. 1–2 дня' },
-        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'напр. 2–3 дня' },
+        { id: 'ai_time_photo', label: 'Срок: фото-сет (5–10 изображений)', placeholder: 'пр. 1–2 дня' },
+        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'пр. 2–3 дня' },
       ]},
     ],
     priceBlocks: [
@@ -541,16 +578,16 @@ const DIRS = {
   video: {
     label: 'Видеооператор / монтажёр',
     specBlocks: [
-      { title: 'Жанры работ (выбрать несколько)', type: 'multi', id: 'v_genres', options: ['Промо-ролики','Reels и Stories','Корпоративное видео','Образовательные ролики','Репортаж и мероприятия','Интервью','Таймлапс','Аэросъёмка','Свой вариант'] },
-      { title: 'Программы монтажа (выбрать несколько)', type: 'multi', id: 'v_soft', options: ['Premiere Pro','DaVinci Resolve','Final Cut','CapCut','After Effects','Свой вариант'] },
+      { title: 'Жанры работ (можно выбрать несколько)', type: 'multi', id: 'v_genres', options: ['Промо-ролики','Reels и Stories','Корпоративное видео','Образовательные ролики','Репортаж и мероприятия','Интервью','Таймлапс','Аэросъёмка','Свой вариант'] },
+      { title: 'Программы монтажа (можно выбрать несколько)', type: 'multi', id: 'v_soft', options: ['Premiere Pro','DaVinci Resolve','Final Cut','CapCut','After Effects','Свой вариант'] },
       { title: 'Оборудование', type: 'fields', fields: [
         { id: 'v_camera', label: 'Своя камера — да/нет, укажите модель', placeholder: 'напр. Sony A7 IV' },
         { id: 'v_light', label: 'Своя светотехника', placeholder: 'да / нет' },
         { id: 'v_drone', label: 'Дрон / аэросъёмка', placeholder: 'да / нет, модель' },
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
-        { id: 'v_time_reel', label: 'Срок: рилс / сторис 15–30 сек (съёмка + монтаж)', placeholder: 'напр. 1–2 дня' },
-        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'напр. 3–5 дней' },
+        { id: 'v_time_reel', label: 'Срок: рилс / сторис 15–30 сек (съёмка + монтаж)', placeholder: 'пр. 1–2 дня' },
+        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'пр. 3–5 дней' },
       ]},
       { title: 'Работаете с ИИ-вставками в монтаже?', type: 'yesno', id: 'v_ai' },
     ],
@@ -564,13 +601,13 @@ const DIRS = {
   motion: {
     label: 'Моушн-дизайн',
     specBlocks: [
-      { title: 'Программы (выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Motion','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
-      { title: 'Стиль анимации (выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
+      { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Motion','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
+      { title: 'Стиль анимации (можно выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
-        { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'напр. 1–2 дня' },
-        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'напр. 3–5 дней' },
-        { id: 'm_time_ai', label: 'ИИ-анимация 30 сек', placeholder: 'напр. 1–2 дня' },
-        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'напр. 5–10 дней' },
+        { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'пр. 1–2 дня' },
+        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 3–5 дней' },
+        { id: 'm_time_ai', label: 'ИИ-анимация 30 сек', placeholder: 'пр. 1–2 дня' },
+        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'пр. 5–10 дней' },
       ]},
     ],
     priceBlocks: [
@@ -582,11 +619,11 @@ const DIRS = {
   design: {
     label: 'Графический дизайн',
     specBlocks: [
-      { title: 'Специализация (выбрать несколько)', type: 'multi', id: 'd_spec', options: ['Логотипы','Брендинг','Иллюстрации','Персонажи','Полиграфия','Сувенирка','Оформление соцсетей','Презентации','Маркетплейсы и карточки товаров','Свой вариант'] },
-      { title: 'Программы (выбрать несколько)', type: 'multi', id: 'd_soft', options: ['Figma','Adobe Illustrator','Photoshop','CorelDRAW','Canva','Используете ИИ (Midjourney, Firefly и др.)','Свой вариант'] },
+      { title: 'Специализация (можно выбрать несколько)', type: 'multi', id: 'd_spec', options: ['Логотипы','Брендинг','Иллюстрации','Персонажи','Полиграфия','Сувенирка','Оформление соцсетей','Презентации','Маркетплейсы и карточки товаров','Свой вариант'] },
+      { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'd_soft', options: ['Figma','Adobe Illustrator','Photoshop','CorelDRAW','Canva','Используете ИИ (Midjourney, Firefly и др.)','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'dual_text', fields: [
-        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'напр. 3–5 дней' },
-        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'напр. 7–14 дней' },
+        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'пр. 3–5 дней' },
+        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'пр. 7–14 дней' },
       ]},
       { title: 'Готовите макеты в печать?', type: 'yesno', id: 'd_print' },
     ],
@@ -603,7 +640,7 @@ const DIRS = {
   web: {
     label: 'Веб-разработка / вёрстка',
     specBlocks: [
-      { title: 'Платформы и инструменты (выбрать несколько)', type: 'multi', id: 'w_soft', options: ['Tilda','Webflow','WordPress','Кастом HTML/CSS/JS','React','Vue','1С-Битрикс','Свой вариант'] },
+      { title: 'Платформы и инструменты (можно выбрать несколько)', type: 'multi', id: 'w_soft', options: ['Tilda','Webflow','WordPress','Кастом HTML/CSS/JS','React','Vue','1С-Битрикс','Свой вариант'] },
       { title: 'Дополнительные услуги', type: 'radio3', fields: [
         { id: 'w_seo', label: 'SEO-базовая настройка' },
         { id: 'w_crm', label: 'Подключение CRM / аналитики' },
@@ -623,14 +660,14 @@ const DIRS = {
   photo: {
     label: 'Фотограф / ретушёр',
     specBlocks: [
-      { title: 'Специализация (выбрать несколько)', type: 'multi', id: 'ph_spec', options: ['Предметная','Фудфото','Фэшн и одежда','Портретная','Репортаж и мероприятия','Интерьерная','Аэросъёмка (дрон)','Ретушь и обработка','Свой вариант'] },
+      { title: 'Специализация (можно выбрать несколько)', type: 'multi', id: 'ph_spec', options: ['Предметная','Фудфото','Фэшн и одежда','Портретная','Репортаж и мероприятия','Интерьерная','Аэросъёмка (дрон)','Ретушь и обработка','Свой вариант'] },
       { title: 'Оборудование', type: 'fields', fields: [
         { id: 'ph_camera', label: 'Своя профессиональная камера — да/нет, укажите модель', placeholder: 'напр. Canon R6' },
         { id: 'ph_studio', label: 'Своя студия', placeholder: 'да / нет' },
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
-        { id: 'ph_time', label: 'Срок сдачи обработанных фото после съёмки', placeholder: 'напр. 2–3 дня' },
-        { id: 'ph_retouch_time', label: 'Срок ретуши 1 фото', placeholder: 'напр. 1–2 часа' },
+        { id: 'ph_time', label: 'Срок сдачи обработанных фото после съёмки', placeholder: 'пр. 2–3 дня' },
+        { id: 'ph_retouch_time', label: 'Срок ретуши 1 фото', placeholder: 'пр. 1–2 часа' },
       ]},
     ],
     priceBlocks: [
@@ -642,12 +679,12 @@ const DIRS = {
   smm: {
     label: 'SMM / Контент-менеджер',
     specBlocks: [
-      { title: 'Платформы (выбрать несколько)', type: 'multi', id: 'smm_plat', options: ['ВКонтакте','Telegram','MAX','Instagram*','TikTok*','YouTube','Дзен','RuTube','Свой вариант'] },
-      { title: 'Навыки (выбрать несколько)', type: 'multi', id: 'smm_skills', options: ['Написание текстов','Создание визуала','Монтаж reels и видео','Фото для постов','Сторис-контент','Разработка контент-плана','Разработка SMM-стратегии','Ведение комьюнити и ответы','Работа с отзывами','Свой вариант'] },
-      { title: 'Реклама и продвижение (выбрать несколько)', type: 'multi', id: 'smm_ads', options: ['Таргет ВКонтакте','Яндекс.Директ','Посевы в Telegram','Работа с блогерами','Коллаборации','Свой вариант'] },
-      { title: 'Инструменты (выбрать несколько)', type: 'multi', id: 'smm_tools', options: ['SMMplanner','Publer','TGStat','VK Analytics','Яндекс.Метрика','Canva','Figma','ИИ (ChatGPT, Claude и др.)','Свой вариант'] },
-      { title: 'Формат сотрудничества (выбрать несколько)', type: 'multi', id: 'smm_format', options: ['Полный SMM-пакет','Только тексты','Только визуал','Только таргет','Разовые задачи'] },
-      { title: 'Кол-во постов в месяц, которые готовы(а) закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'напр. 12–16 постов' },
+      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'smm_plat', options: ['ВКонтакте','Telegram','MAX','Instagram*','TikTok*','YouTube','Дзен','RuTube','Свой вариант'] },
+      { title: 'Навыки (можно выбрать несколько)', type: 'multi', id: 'smm_skills', options: ['Написание текстов','Создание визуала','Монтаж reels и видео','Фото для постов','Сторис-контент','Разработка контент-плана','Разработка SMM-стратегии','Ведение комьюнити и ответы','Работа с отзывами','Свой вариант'] },
+      { title: 'Реклама и продвижение (можно выбрать несколько)', type: 'multi', id: 'smm_ads', options: ['Таргет ВКонтакте','Яндекс.Директ','Посевы в Telegram','Работа с блогерами','Коллаборации','Свой вариант'] },
+      { title: 'Инструменты (можно выбрать несколько)', type: 'multi', id: 'smm_tools', options: ['SMMplanner','Publer','TGStat','VK Analytics','Яндекс.Метрика','Canva','Figma','ИИ (ChatGPT, Claude и др.)','Свой вариант'] },
+      { title: 'Формат сотрудничества (можно выбрать несколько)', type: 'multi', id: 'smm_format', options: ['Полный SMM-пакет','Только тексты','Только визуал','Только таргет','Разовые задачи'] },
+      { title: 'Кол-во постов в месяц, которые готовы(а) закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'пр. 12–16 постов' },
       { title: 'Готовы(а) к долгосрочному сотрудничеству?', type: 'yesno', id: 'smm_longterm' },
       { title: 'Есть опыт в нише: digital, творческие студии, образование?', type: 'yesno', id: 'smm_exp' },
     ],
@@ -659,10 +696,10 @@ const DIRS = {
   bot: {
     label: 'Разработка чат-ботов',
     specBlocks: [
-      { title: 'Платформы (выбрать несколько)', type: 'multi', id: 'bot_plat', options: ['Telegram','ВКонтакте','MAX','WhatsApp*','Viber','Сайт (виджет)','Свой вариант'] },
-      { title: 'Тип разработки (выбрать несколько)', type: 'multi', id: 'bot_type', options: ['No-code конструктор (BotHelp, SaleBot, PuzzleBot, Senler)','Кастомный код (Python, Node.js)','Telegram Mini App','Свой вариант'] },
-      { title: 'Типы ботов, которые умеете делать (выбрать несколько)', type: 'multi', id: 'bot_kinds', options: ['Бот-визитка','FAQ-бот','Лид-бот (сбор заявок)','Квиз-бот','Бот-воронка (автоворонка продаж)','Бот-рассылка (прогрев, цепочки)','Бот-поддержка (первая линия)','Бот-каталог','Бот с оплатой','AI-бот (GPT/Claude)','Гибридный бот (сценарий + AI)','Telegram Mini App','Свой вариант'] },
-      { title: 'Интеграции (выбрать несколько)', type: 'multi', id: 'bot_int', options: ['AmoCRM','Битрикс24','GetCourse','Google Sheets','ЮMoney','Telegram Payments','Albato','Make (Integromat)','Собственный API','Свой вариант'] },
+      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'bot_plat', options: ['Telegram','ВКонтакте','MAX','WhatsApp*','Viber','Сайт (виджет)','Свой вариант'] },
+      { title: 'Тип разработки (можно выбрать несколько)', type: 'multi', id: 'bot_type', options: ['No-code конструктор (BotHelp, SaleBot, PuzzleBot, Senler)','Кастомный код (Python, Node.js)','Telegram Mini App','Свой вариант'] },
+      { title: 'Типы ботов, которые умеете делать (можно выбрать несколько)', type: 'multi', id: 'bot_kinds', options: ['Бот-визитка','FAQ-бот','Лид-бот (сбор заявок)','Квиз-бот','Бот-воронка (автоворонка продаж)','Бот-рассылка (прогрев, цепочки)','Бот-поддержка (первая линия)','Бот-каталог','Бот с оплатой','AI-бот (GPT/Claude)','Гибридный бот (сценарий + AI)','Telegram Mini App','Свой вариант'] },
+      { title: 'Интеграции (можно выбрать несколько)', type: 'multi', id: 'bot_int', options: ['AmoCRM','Битрикс24','GetCourse','Google Sheets','ЮMoney','Telegram Payments','Albato','Make (Integromat)','Собственный API','Свой вариант'] },
       { title: 'Навыки', type: 'radio3', fields: [
         { id: 'bot_script', label: 'Пишете сценарии и диалоговые скрипты' },
         { id: 'bot_ai', label: 'Подключаете GPT / Claude (AI-ответы)' },
@@ -670,9 +707,9 @@ const DIRS = {
         { id: 'bot_anal', label: 'Делаете аналитику и отчёты по боту' },
       ]},
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
-        { id: 'bot_time_simple', label: 'Простой бот (FAQ / лид-бот)', placeholder: 'напр. 1–3 дня' },
-        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'напр. 5–10 дней' },
-        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'напр. 10–20 дней' },
+        { id: 'bot_time_simple', label: 'Простой бот (FAQ / лид-бот)', placeholder: 'пр. 1–3 дня' },
+        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'пр. 5–10 дней' },
+        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'пр. 10–20 дней' },
       ]},
     ],
     priceBlocks: [
@@ -748,7 +785,22 @@ function goStep2b() {
 function buildSpecFields(blocks) {
   const container = document.getElementById('spec-fields');
   container.innerHTML = '';
-  blocks.forEach(block => {
+
+  // Блок опыта — добавляется во все направления перед портфолио
+  const expBlock = {
+    title: 'Опыт в сфере',
+    type: 'yesno3',
+    id: 'exp_years'
+  };
+
+  // Вставляем блок опыта перед последним блоком (портфолио)
+  const blocksWithExp = [...blocks];
+  const portoIdx = blocksWithExp.findIndex(b => b.l === 'Портфолио' || (b.fields && b.fields[0] && b.fields[0].id && b.fields[0].id.includes('portfolio')));
+  // Вставляем перед блоком "Портфолио" или предпоследним если не найден
+  const insertAt = portoIdx > 0 ? portoIdx : blocksWithExp.length - 1;
+  blocksWithExp.splice(insertAt, 0, expBlock);
+
+  blocksWithExp.forEach(block => {
     const card = document.createElement('div');
     card.className = 'card';
     let html = `<div class="section-title">${block.title}</div>`;
@@ -756,13 +808,19 @@ function buildSpecFields(blocks) {
     if (block.type === 'multi') {
       html += `<div class="check-grid" id="cg_${block.id}">`;
       block.options.forEach((opt, i) => {
-        html += `<label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="${block.id}" value="${opt}"><div class="check-box"></div>${opt}</label>`;
+        html += `<label class="check-item" ><input type="checkbox" name="${block.id}" value="${opt}" onchange="syncCheck(this)"><div class="check-box"></div>${opt}</label>`;
       });
       html += '</div>';
     } else if (block.type === 'yesno') {
       html += `<div class="radio-group">
         <label class="radio-item" onclick="toggleRadio(this, '${block.id}')"><input type="radio" name="${block.id}" value="Да"><div class="radio-dot"></div>Да</label>
         <label class="radio-item" onclick="toggleRadio(this, '${block.id}')"><input type="radio" name="${block.id}" value="Нет"><div class="radio-dot"></div>Нет</label>
+      </div>`;
+    } else if (block.type === 'yesno3') {
+      html += `<div class="radio-group">
+        <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="Менее 1 года"><div class="radio-dot"></div>Менее 1 года</label>
+        <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="1–3 года"><div class="radio-dot"></div>1–3 года</label>
+        <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="Более 3 лет"><div class="radio-dot"></div>Более 3 лет</label>
       </div>`;
     } else if (block.type === 'radio3') {
       block.fields.forEach(f => {
@@ -810,6 +868,10 @@ function buildPriceFields(blocks) {
 }
 
 // ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function syncCheck(inp) {
+  const label = inp.closest(".check-item");
+  label.classList.toggle("checked", inp.checked);
+}
 function toggleCheck(el) {
   el.classList.toggle('checked');
   el.querySelector('input').checked = el.classList.contains('checked');
@@ -918,6 +980,10 @@ function collectData() {
     comment: document.getElementById('f-comment').value.trim(),
   };
 
+  // Опыт в сфере (общий для всех направлений)
+  const expEl = document.querySelector(`input[name="exp_years"]:checked`);
+  data['exp_years'] = expEl ? expEl.value : '';
+
   // spec fields
   d.specBlocks.forEach(block => {
     if (block.type === 'multi') {
@@ -972,6 +1038,10 @@ async function submitForm() {
     document.querySelector('.progress-bar').style.display = 'none';
     document.getElementById('success-screen').style.display = '';
     document.querySelector('.header').style.display = 'none';
+    // Show toast
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 5000);
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Отправить анкету ✓';
