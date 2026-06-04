@@ -361,6 +361,9 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at center, rgba(30,0,60,0.92) 0%, rgba(0,0,0,0) 70%);
+  opacity: 0;
+}
+.cat-overlay.show .cat-bg {
   animation: bgPulse 4s ease-in-out forwards;
 }
 @keyframes bgPulse {
@@ -373,6 +376,10 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   position: relative;
   width: min(90vw, 90vh);
   height: min(90vw, 90vh);
+  transform: scale(0.05);
+  opacity: 0;
+}
+.cat-overlay.show .cat-face {
   animation: catZoom 4s ease-in-out forwards;
 }
 @keyframes catZoom {
@@ -435,7 +442,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>НАВИ · Digital Studio</div>
     <h1>База крутых ребят</h1>
-    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш закрытый список специалистов. <span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span> Как только появится проект, который идеально подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
+    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш список специалистов. <span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span> Как только появится проект, который подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
   </div>
 
   <!-- Steps -->
