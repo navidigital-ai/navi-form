@@ -224,14 +224,19 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .check-item.checked .check-box::after { display: block; }
 
 /* City autocomplete */
-.autocomplete-wrap { position: relative; }
+.autocomplete-wrap { position: relative; z-index: 100; }
 .autocomplete-list {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 4px);
   background: var(--bg2);
   border: 1px solid var(--border-hover);
   border-radius: var(--radius-sm);
-  margin-top: 4px;
   overflow: hidden;
   display: none;
+  max-height: 280px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 .autocomplete-list.open { display: block; }
 .autocomplete-item {
@@ -330,6 +335,55 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
+/* Neon Cat Overlay */
+.cat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  pointer-events: none;
+  opacity: 0;
+}
+.cat-overlay.show {
+  animation: catAppear 4s ease-in-out forwards;
+}
+@keyframes catAppear {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  15%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.cat-overlay .cat-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(30,0,60,0.92) 0%, rgba(0,0,0,0) 70%);
+  animation: bgPulse 4s ease-in-out forwards;
+}
+@keyframes bgPulse {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.cat-overlay .cat-face {
+  position: relative;
+  width: min(90vw, 90vh);
+  height: min(90vw, 90vh);
+  animation: catZoom 4s ease-in-out forwards;
+}
+@keyframes catZoom {
+  0%   { transform: scale(0.05); opacity: 0; }
+  15%  { transform: scale(0.6);  opacity: 1; }
+  30%  { transform: scale(0.85); opacity: 1; }
+  50%  { transform: scale(0.9);  opacity: 1; }
+  75%  { transform: scale(0.88); opacity: 1; }
+  100% { transform: scale(0.05); opacity: 0; }
+}
+
 /* Toast */
 .toast {
   position: fixed;
@@ -381,7 +435,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>НАВИ · Digital Studio</div>
     <h1>База крутых ребят</h1>
-    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш список специалистов. <span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span> Как только появится проект, который подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
+    <p class="subtitle">Расскажите немного о себе, и мы добавим вас в наш закрытый список специалистов. <span class="subtitle-highlight">Мы ищем как опытных профи, так и ребят, которые только начинают свой путь и набираются опыта.</span> Как только появится проект, который идеально подходит под ваши навыки и уровень, мы сразу же напишем вам. Никакой воды, только релевантные заказы и честное сотрудничество. Всем добра!</p>
   </div>
 
   <!-- Steps -->
@@ -518,8 +572,9 @@ input.error, textarea.error, select.error { border-color: var(--error); }
     <div class="card">
       <div class="section-title">Портфолио</div>
       <div class="field">
-        <label class="field-label">Ссылка на портфолио / шоурил / примеры работ</label>
+        <label class="field-label">Ссылка на портфолио / шоурил / примеры работ <span class="req">обязательно</span></label>
         <input type="url" id="f-portfolio" placeholder="https://...">
+        <div class="field-error" id="e-portfolio">Укажите ссылку на портфолио или примеры работ</div>
       </div>
       <div class="field">
         <label class="field-label">Дополнительные навыки, комментарии, пожелания</label>
@@ -543,13 +598,56 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 
   <!-- Toast -->
   <div class="toast" id="toast">Спасибо! Мы уже сохранили вашу анкету. Первое письмо с потенциальным проектом может прилететь уже скоро 😉</div>
+  <!-- Neon Cat Overlay -->
+  <div class="cat-overlay" id="neon-cat">
+    <div class="cat-bg"></div>
+    <svg class="cat-face" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow-strong"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-soft"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <g filter="url(#glow-strong)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="200" cy="215" rx="155" ry="140" stroke="#9333ea" stroke-width="3"/>
+        <polygon points="80,105 45,25 130,90" stroke="#a855f7" stroke-width="3"/>
+        <polygon points="320,105 355,25 270,90" stroke="#a855f7" stroke-width="3"/>
+        <polygon points="82,100 58,40 122,88" stroke="#f0abfc" stroke-width="2"/>
+        <polygon points="318,100 342,40 278,88" stroke="#f0abfc" stroke-width="2"/>
+        <ellipse cx="145" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
+        <ellipse cx="145" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
+        <circle cx="133" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
+        <ellipse cx="255" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
+        <ellipse cx="255" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
+        <circle cx="243" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
+        <polygon points="200,265 187,282 213,282" stroke="#ec4899" stroke-width="2.5"/>
+        <path d="M187,282 Q175,296 165,290" stroke="#db2777" stroke-width="2.5"/>
+        <path d="M213,282 Q225,296 235,290" stroke="#db2777" stroke-width="2.5"/>
+        <g filter="url(#glow-soft)">
+          <path stroke="#f43f5e" stroke-width="7" fill="none">
+            <animate attributeName="d" dur="0.55s" repeatCount="indefinite"
+              values="M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368;
+                      M192,288 Q200,310 200,330 Q200,358 190,370 Q185,376 190,384;
+                      M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368"/>
+          </path>
+          <ellipse cx="193" cy="370" rx="10" ry="7" stroke="#f43f5e" stroke-width="2">
+            <animate attributeName="cy" dur="0.55s" repeatCount="indefinite" values="366;382;366"/>
+          </ellipse>
+        </g>
+        <line x1="30"  y1="248" x2="165" y2="268" stroke="#6d28d9" stroke-width="2"/>
+        <line x1="20"  y1="270" x2="163" y2="278" stroke="#6d28d9" stroke-width="2"/>
+        <line x1="30"  y1="292" x2="165" y2="288" stroke="#6d28d9" stroke-width="2"/>
+        <line x1="370" y1="248" x2="235" y2="268" stroke="#6d28d9" stroke-width="2"/>
+        <line x1="380" y1="270" x2="237" y2="278" stroke="#6d28d9" stroke-width="2"/>
+        <line x1="370" y1="292" x2="235" y2="288" stroke="#6d28d9" stroke-width="2"/>
+      </g>
+    </svg>
+  </div>
 
 </div>
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // ЗАМЕНИТЕ на ваши значения:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSg-NJFmpAQ-mxXhNWRJjuLZKtr1rMfmZ6EHgHNRBnWLjwusCpN31BSo6mYANR0hpg/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwb50zT_pOdwDgpRXMazkRzm3ABVaa34T5tnaYcaGLWa6jP_1NJDiULfX9hmCSq9Zpo/exec';
 const DADATA_TOKEN = 'edbce6e7ea5643553d7e45efeb67c8247e3e353f';
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -575,7 +673,7 @@ const DIRS = {
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
         { id: 'ai_time_photo', label: 'Срок: фото-сет (5–10 изображений)', placeholder: 'пр. 1–2 дня' },
-        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'пр. 1–2 дня' },
+        { id: 'ai_time_video', label: 'Срок: ролик до 30 сек', placeholder: 'пр. 2–3 дня' },
       ]},
     ],
     priceBlocks: [
@@ -595,7 +693,7 @@ const DIRS = {
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
         { id: 'v_time_reel', label: 'Срок: рилс / сторис 15–30 сек (съёмка + монтаж)', placeholder: 'пр. 1–2 дня' },
-        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'пр. 1–3 дня' },
+        { id: 'v_time_promo', label: 'Срок: промо-ролик 1–2 мин', placeholder: 'пр. 3–5 дней' },
       ]},
       { title: 'Работаете с ИИ-вставками в монтаже?', type: 'yesno', id: 'v_ai' },
     ],
@@ -609,13 +707,13 @@ const DIRS = {
   motion: {
     label: 'Моушн-дизайн',
     specBlocks: [
-      { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Motion','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
+      { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
       { title: 'Стиль анимации (можно выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
         { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'пр. 1–2 дня' },
-        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 1–2 дня' },
+        { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 3–5 дней' },
         { id: 'm_time_ai', label: 'ИИ-анимация 30 сек', placeholder: 'пр. 1–2 дня' },
-        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'пр. 2–5 дней' },
+        { id: 'm_time_full', label: 'Полный ролик 1–2 мин', placeholder: 'пр. 5–10 дней' },
       ]},
     ],
     priceBlocks: [
@@ -630,8 +728,8 @@ const DIRS = {
       { title: 'Специализация (можно выбрать несколько)', type: 'multi', id: 'd_spec', options: ['Логотипы','Брендинг','Иллюстрации','Персонажи','Полиграфия','Сувенирка','Оформление соцсетей','Презентации','Маркетплейсы и карточки товаров','Свой вариант'] },
       { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'd_soft', options: ['Figma','Adobe Illustrator','Photoshop','CorelDRAW','Canva','Используете ИИ (Midjourney, Firefly и др.)','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'dual_text', fields: [
-        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'пр. 1–2 дня' },
-        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'пр. 4–12 дней' },
+        { id: 'd_time_logo', label: 'Срок: логотип (3 варианта)', placeholder: 'пр. 3–5 дней' },
+        { id: 'd_time_brand', label: 'Срок: брендбук', placeholder: 'пр. 7–14 дней' },
       ]},
       { title: 'Готовите макеты в печать?', type: 'yesno', id: 'd_print' },
     ],
@@ -648,7 +746,7 @@ const DIRS = {
   web: {
     label: 'Веб-разработка / вёрстка',
     specBlocks: [
-      { title: 'Платформы и инструменты (можно выбрать несколько)', type: 'multi', id: 'w_soft', options: ['Tilda','Webflow','WordPress','Кастом HTML/CSS/JS','React','Vue','1С-Битрикс','Свой вариант'] },
+      { title: 'Платформы и инструменты (можно выбрать несколько)', type: 'multi', id: 'w_soft', options: ['Tilda','Webflow','WordPress','Кастом HTML/CSS/JS','Свой вариант'] },
       { title: 'Дополнительные услуги', type: 'radio3', fields: [
         { id: 'w_seo', label: 'SEO-базовая настройка' },
         { id: 'w_crm', label: 'Подключение CRM / аналитики' },
@@ -675,7 +773,6 @@ const DIRS = {
       ]},
       { title: 'Сроки', type: 'dual_text', fields: [
         { id: 'ph_time', label: 'Срок сдачи обработанных фото после съёмки', placeholder: 'пр. 2–3 дня' },
-        { id: 'ph_retouch_time', label: 'Срок ретуши 1 фото', placeholder: 'пр. 1–2 часа' },
       ]},
     ],
     priceBlocks: [
@@ -687,14 +784,13 @@ const DIRS = {
   smm: {
     label: 'SMM / Контент-менеджер',
     specBlocks: [
-      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'smm_plat', options: ['ВКонтакте','Telegram','MAX','Instagram*','TikTok*','YouTube','Дзен','RuTube','Свой вариант'] },
+      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'smm_plat', options: ['ВКонтакте','Telegram','MAX','Нельзяграм','Тик-Так','YouTube','Дзен','RuTube','Свой вариант'] },
       { title: 'Навыки (можно выбрать несколько)', type: 'multi', id: 'smm_skills', options: ['Написание текстов','Создание визуала','Монтаж reels и видео','Фото для постов','Сторис-контент','Разработка контент-плана','Разработка SMM-стратегии','Ведение комьюнити и ответы','Работа с отзывами','Свой вариант'] },
       { title: 'Реклама и продвижение (можно выбрать несколько)', type: 'multi', id: 'smm_ads', options: ['Таргет ВКонтакте','Яндекс.Директ','Посевы в Telegram','Работа с блогерами','Коллаборации','Свой вариант'] },
       { title: 'Инструменты (можно выбрать несколько)', type: 'multi', id: 'smm_tools', options: ['SMMplanner','Publer','TGStat','VK Analytics','Яндекс.Метрика','Canva','Figma','ИИ (ChatGPT, Claude и др.)','Свой вариант'] },
       { title: 'Формат сотрудничества (можно выбрать несколько)', type: 'multi', id: 'smm_format', options: ['Полный SMM-пакет','Только тексты','Только визуал','Только таргет','Разовые задачи'] },
-      { title: 'Кол-во постов в месяц, которые готовы(а) закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'пр. 12–16 постов' },
-      { title: 'Готовы(а) к долгосрочному сотрудничеству?', type: 'yesno', id: 'smm_longterm' },
-      { title: 'Есть опыт в нише: творческие студии, образование?', type: 'yesno', id: 'smm_exp' },
+      { title: 'Кол-во постов в месяц, которые готовы закрывать', type: 'single_text', id: 'smm_posts', placeholder: 'пр. 12–16 постов' },
+      { title: 'Готовы к долгосрочному сотрудничеству?', type: 'yesno', id: 'smm_longterm' },
     ],
     priceBlocks: [
       { id: 'p_smm_full', label: 'Ведение одного клиента в месяц (полный пакет)' },
@@ -704,20 +800,14 @@ const DIRS = {
   bot: {
     label: 'Разработка чат-ботов',
     specBlocks: [
-      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'bot_plat', options: ['Telegram','ВКонтакте','MAX','WhatsApp*','Viber','Сайт (виджет)','Свой вариант'] },
+      { title: 'Платформы (можно выбрать несколько)', type: 'multi', id: 'bot_plat', options: ['Telegram','ВКонтакте','MAX','Васап','Сайт (виджет)','Свой вариант'] },
       { title: 'Тип разработки (можно выбрать несколько)', type: 'multi', id: 'bot_type', options: ['No-code конструктор (BotHelp, SaleBot, PuzzleBot, Senler)','Кастомный код (Python, Node.js)','Telegram Mini App','Свой вариант'] },
       { title: 'Типы ботов, которые умеете делать (можно выбрать несколько)', type: 'multi', id: 'bot_kinds', options: ['Бот-визитка','FAQ-бот','Лид-бот (сбор заявок)','Квиз-бот','Бот-воронка (автоворонка продаж)','Бот-рассылка (прогрев, цепочки)','Бот-поддержка (первая линия)','Бот-каталог','Бот с оплатой','AI-бот (GPT/Claude)','Гибридный бот (сценарий + AI)','Telegram Mini App','Свой вариант'] },
       { title: 'Интеграции (можно выбрать несколько)', type: 'multi', id: 'bot_int', options: ['AmoCRM','Битрикс24','GetCourse','Google Sheets','ЮMoney','Telegram Payments','Albato','Make (Integromat)','Собственный API','Свой вариант'] },
-      { title: 'Навыки', type: 'radio3', fields: [
-        { id: 'bot_script', label: 'Пишете сценарии и диалоговые скрипты' },
-        { id: 'bot_ai', label: 'Подключаете GPT / Claude (AI-ответы)' },
-        { id: 'bot_seg', label: 'Настраиваете рассылки и сегментацию базы' },
-        { id: 'bot_anal', label: 'Делаете аналитику и отчёты по боту' },
-      ]},
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
         { id: 'bot_time_simple', label: 'Простой бот (FAQ / лид-бот)', placeholder: 'пр. 1–3 дня' },
-        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'пр. 4–8 дней' },
-        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'пр. 8–20 дней' },
+        { id: 'bot_time_funnel', label: 'Бот-воронка средней сложности', placeholder: 'пр. 5–10 дней' },
+        { id: 'bot_time_ai', label: 'AI-бот с интеграцией', placeholder: 'пр. 10–20 дней' },
       ]},
     ],
     priceBlocks: [
@@ -770,9 +860,25 @@ function goStep3() {
   if (GEO_DIRS.includes(selectedDir)) {
     const cv = document.getElementById('f-city-val').value;
     const cc = document.getElementById('f-city-custom').value.trim();
-    if (!cv && !cc) { showErr('e-city'); return; }
+    if (!cv && !cc) { showErr('e-city'); document.getElementById('f-city').scrollIntoView({behavior:'smooth',block:'center'}); return; }
     hideErr('e-city');
   }
+
+  // experience validation — обязательно
+  const expChecked = document.querySelector('input[name="exp_years"]:checked');
+  if (!expChecked) {
+    showErr('e-exp');
+    const grp = document.getElementById('exp-group');
+    if (grp) {
+      grp.scrollIntoView({behavior:'smooth', block:'center'});
+      grp.style.outline = '2px solid var(--error)';
+      grp.style.borderRadius = '8px';
+      grp.style.padding = '6px';
+      setTimeout(() => { grp.style.outline = ''; grp.style.padding = ''; }, 2500);
+    }
+    return;
+  }
+  hideErr('e-exp');
 
   // build price fields
   const d = DIRS[selectedDir];
@@ -828,11 +934,13 @@ function buildSpecFields(blocks) {
         <label class="radio-item" onclick="toggleRadio(this, '${block.id}')"><input type="radio" name="${block.id}" value="Нет"><div class="radio-dot"></div>Нет</label>
       </div>`;
     } else if (block.type === 'yesno3') {
-      html += `<div class="radio-group">
+      html = `<div class="section-title">${block.title} <span class="req" style="-webkit-text-fill-color:var(--accent);background:none;font-size:10px;text-transform:lowercase;letter-spacing:0">обязательно</span></div>`;
+      html += `<div class="radio-group" id="exp-group">
         <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="Менее 1 года"><div class="radio-dot"></div>Менее 1 года</label>
         <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="1–3 года"><div class="radio-dot"></div>1–3 года</label>
         <label class="radio-item" onclick="toggleRadio(this,'${block.id}')"><input type="radio" name="${block.id}" value="Более 3 лет"><div class="radio-dot"></div>Более 3 лет</label>
-      </div>`;
+      </div>
+      <div class="field-error" id="e-exp">Пожалуйста, укажите ваш опыт в сфере</div>`;
     } else if (block.type === 'radio3') {
       block.fields.forEach(f => {
         html += `<div class="field"><label class="field-label">${f.label}</label><div class="radio-group">
@@ -927,6 +1035,17 @@ function setStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Запасной список крупных городов РФ (если Dadata недоступна)
+const FALLBACK_CITIES = [
+"Москва","Санкт-Петербург","Новосибирск","Екатеринбург","Казань","Нижний Новгород","Самара","Омск","Уфа","Красноярск","Ростов-на-Дону","Воронеж","Пермь","Краснодар","Волгоград","Саратов","Тюмень","Тольятти","Ижевск","Барнаул","Ульяновск","Хабаровск","Иркутск","Ярославль","Владивосток","Махачкала","Томск","Оренбург","Кемерово","Новокузнецк","Рязань","Пенза","Астрахань","Набережные Челны","Липецк","Тула","Киров","Чебоксары","Калининград","Брянск","Курск","Иваново","Магнитогорск","Тверь","Улан-Удэ","Ставрополь","Белгород","Сочи","Сургут","Владимир","Архангельск","Симферополь","Севастополь","Мурманск","Чита","Якутск","Владикавказ","Смоленск","Череповец","Вологда","Курган","Орёл","Тамбов","Нальчик","Грозный","Саранск","Петрозаводск","Благовещенск","Майкоп","Элиста","Псков","Великий Новгород","Кострома","Йошкар-Ола","Сыктывкар","Салехард","Ханты-Мансийск","Петропавловск-Камчатский","Магадан","Южно-Сахалинск","Биробиджан","Абакан","Кызыл","Горно-Алтайск","Черкесск","Магас","Анадырь","Нарьян-Мар","Донецк","Луганск","Мариуполь","Макеевка","Горловка","Херсон","Мелитополь","Бердянск","Геническ","Дербент","Пятигорск","Кисловодск","Ессентуки","Таганрог","Шахты","Армавир","Новороссийск","Анапа","Геленджик","Стерлитамак","Нижнекамск","Альметьевск","Северодвинск","Балашиха","Подольск","Химки","Мытищи","Королёв","Люберцы","Красногорск","Одинцово","Дзержинск","Нижневартовск","Новый Уренгой","Ноябрьск","Энгельс","Волжский","Старый Оскол","Орск"
+];
+
+function renderFallback(q) {
+  const ql = q.toLowerCase();
+  const matches = FALLBACK_CITIES.filter(c => c.toLowerCase().includes(ql)).slice(0, 8);
+  renderCityList(matches.map(c => ({ value: c })));
+}
+
 // ─── CITY AUTOCOMPLETE (Dadata) ───────────────────────────────────────────────
 function cityInput() {
   const q = document.getElementById('f-city').value.trim();
@@ -947,10 +1066,15 @@ async function fetchCities(q) {
       body: JSON.stringify({ query: q, count: 8, from_bound: { value: 'city' }, to_bound: { value: 'settlement' }, locations: [{ country: 'ru' }] })
     });
     const data = await res.json();
-    renderCityList(data.suggestions || []);
+    const items = data.suggestions || [];
+    if (items.length > 0) {
+      renderCityList(items);
+    } else {
+      renderFallback(q);
+    }
   } catch(e) {
-    list.innerHTML = '<div class="autocomplete-loader">Ошибка загрузки. Введите вручную.</div>';
-    setTimeout(showCityCustom, 1500);
+    // Dadata недоступна — используем локальный список
+    renderFallback(q);
   }
 }
 
@@ -1058,6 +1182,27 @@ function collectData() {
 
 // ─── SUBMIT ───────────────────────────────────────────────────────────────────
 async function submitForm() {
+  // validate portfolio
+  const portfolio = document.getElementById('f-portfolio').value.trim();
+  if (!portfolio) {
+    showErr('e-portfolio');
+    document.getElementById('f-portfolio').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  hideErr('e-portfolio');
+
+  // validate exp — на случай если как-то пропустили
+  const expEl = document.querySelector('input[name="exp_years"]:checked');
+  if (!expEl) {
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('step2').style.display = '';
+    setStep(2);
+    showErr('e-exp');
+    const grp = document.getElementById('exp-group');
+    if (grp) grp.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.textContent = 'Отправляем...';
@@ -1065,21 +1210,32 @@ async function submitForm() {
   const payload = collectData();
 
   try {
+    // FormData работает с no-cors, Google Script принимает через e.parameter
+    const form = new FormData();
+    form.append('data', JSON.stringify(payload));
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: form
     });
     document.getElementById('main-form').style.display = 'none';
     document.getElementById('steps').style.display = 'none';
     document.querySelector('.progress-bar').style.display = 'none';
     document.getElementById('success-screen').style.display = '';
     document.querySelector('.header').style.display = 'none';
-    // Show toast
+
+    // Toast
     const toast = document.getElementById('toast');
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 5000);
+
+    // Кот появляется через 3 секунды
+    setTimeout(() => {
+      const cat = document.getElementById('neon-cat');
+      cat.classList.add('show');
+      setTimeout(() => cat.classList.remove('show'), 4000);
+    }, 3000);
+
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Отправить анкету ✓';
