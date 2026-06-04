@@ -345,6 +345,22 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 }
 .success-text { font-size: 16px; color: var(--text2); line-height: 1.7; }
 
+/* Неоновые перетекающие линии за карточкой */
+.success-neon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  animation: neonFadeIn 1.2s ease forwards;
+}
+.success-neon svg { width: 100%; height: 100%; }
+@keyframes neonFadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 0.85; }
+}
+
 /* Error message */
 .field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
 .field-error.show { display: block; }
@@ -366,12 +382,6 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 }
 .back-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
-/* Success cat — лёгкое покачивание */
-.success-cat { animation: catBob 2.5s ease-in-out infinite; }
-@keyframes catBob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
 
 .custom-option-wrap { padding: 4px 0 2px; }
 .custom-option-inp { width: 100%; font-size: 13px; padding: 8px 12px; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--bg3); color: var(--text); font-family: 'Golos Text', sans-serif; }
@@ -486,7 +496,7 @@ input.error, textarea.error, select.error { border-color: var(--error); }
         <label class="field-label">Выберите вашу специализацию <span class="req">обязательно</span></label>
         <div class="dir-grid" id="dir-grid">
           <button type="button" class="dir-btn" data-dir="ai"><div class="dir-btn-icon">✦</div><span class="dir-btn-label">ИИ-генерация</span><span class="dir-btn-sub">Midjourney, Runway, Kling</span></button>
-          <button type="button" class="dir-btn" data-dir="video"><div class="dir-btn-icon">◈</div><span class="dir-btn-label">Видеооператор</span><span class="dir-btn-sub">Съёмка, монтаж</span></button>
+          <button type="button" class="dir-btn" data-dir="video"><div class="dir-btn-icon">◈</div><span class="dir-btn-label">Видеооператор/Монтажёр</span><span class="dir-btn-sub">Съёмка, монтаж</span></button>
           <button type="button" class="dir-btn" data-dir="motion"><div class="dir-btn-icon">◎</div><span class="dir-btn-label">Моушн-дизайн</span><span class="dir-btn-sub">AE, C4D, Blender</span></button>
           <button type="button" class="dir-btn" data-dir="design"><div class="dir-btn-icon">◇</div><span class="dir-btn-label">Графдизайн</span><span class="dir-btn-sub">Бренды, полиграфия</span></button>
           <button type="button" class="dir-btn" data-dir="web"><div class="dir-btn-icon">⬡</div><span class="dir-btn-label">Веб-разработка</span><span class="dir-btn-sub">Tilda, Webflow</span></button>
@@ -553,48 +563,49 @@ input.error, textarea.error, select.error { border-color: var(--error); }
 
   <!-- Success -->
   <div class="success-screen" id="success-screen">
+    <div class="success-neon" id="success-neon">
+      <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <filter id="neon-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="ng1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6cfa"/><stop offset="100%" stop-color="#c084fc"/></linearGradient>
+          <linearGradient id="ng2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#e879f9"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+          <linearGradient id="ng3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#7c6cfa"/></linearGradient>
+        </defs>
+        <g filter="url(#neon-glow)" fill="none" stroke-linecap="round">
+          <path stroke="url(#ng1)" stroke-width="2.5">
+            <animate attributeName="d" dur="6s" repeatCount="indefinite"
+              values="M0,150 C150,60 300,240 450,120 C520,70 580,160 600,150;
+                      M0,120 C150,200 300,40 450,180 C520,220 580,90 600,130;
+                      M0,150 C150,60 300,240 450,120 C520,70 580,160 600,150"/>
+          </path>
+          <path stroke="url(#ng2)" stroke-width="2">
+            <animate attributeName="d" dur="7s" repeatCount="indefinite"
+              values="M0,180 C120,120 280,260 420,140 C500,80 560,200 600,170;
+                      M0,200 C120,260 280,100 420,220 C500,280 560,120 600,190;
+                      M0,180 C120,120 280,260 420,140 C500,80 560,200 600,170"/>
+          </path>
+          <path stroke="url(#ng3)" stroke-width="2">
+            <animate attributeName="d" dur="8s" repeatCount="indefinite"
+              values="M0,90 C140,180 300,20 440,160 C520,230 570,80 600,110;
+                      M0,110 C140,40 300,200 440,80 C520,30 570,190 600,140;
+                      M0,90 C140,180 300,20 440,160 C520,230 570,80 600,110"/>
+          </path>
+          <path stroke="#a855f7" stroke-width="1.5" opacity="0.7">
+            <animate attributeName="d" dur="9s" repeatCount="indefinite"
+              values="M0,230 C160,150 320,290 460,190 C530,140 575,240 600,210;
+                      M0,210 C160,280 320,130 460,250 C530,300 575,150 600,230;
+                      M0,230 C160,150 320,290 460,190 C530,140 575,240 600,210"/>
+          </path>
+          <path stroke="#22d3ee" stroke-width="1.5" opacity="0.6">
+            <animate attributeName="d" dur="10s" repeatCount="indefinite"
+              values="M0,50 C180,130 340,10 480,110 C540,150 580,60 600,80;
+                      M0,70 C180,20 340,150 480,50 C540,10 580,140 600,100;
+                      M0,50 C180,130 340,10 480,110 C540,150 580,60 600,80"/>
+          </path>
+        </g>
+      </svg>
+    </div>
     <div class="success-card">
-      <div class="success-cat" id="success-cat">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:160px;height:160px;display:block;margin:0 auto 8px">
-          <defs>
-            <filter id="glow-strong"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            <filter id="glow-soft"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <g filter="url(#glow-strong)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <ellipse cx="200" cy="215" rx="155" ry="140" stroke="#9333ea" stroke-width="3"/>
-            <polygon points="80,105 45,25 130,90" stroke="#a855f7" stroke-width="3"/>
-            <polygon points="320,105 355,25 270,90" stroke="#a855f7" stroke-width="3"/>
-            <polygon points="82,100 58,40 122,88" stroke="#f0abfc" stroke-width="2"/>
-            <polygon points="318,100 342,40 278,88" stroke="#f0abfc" stroke-width="2"/>
-            <ellipse cx="145" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
-            <ellipse cx="145" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
-            <circle cx="133" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
-            <ellipse cx="255" cy="195" rx="38" ry="44" stroke="#c026d3" stroke-width="3"/>
-            <ellipse cx="255" cy="200" rx="18" ry="32" stroke="#7e22ce" stroke-width="2.5"/>
-            <circle cx="243" cy="185" r="6" stroke="#f5d0fe" stroke-width="2" opacity="0.9"/>
-            <polygon points="200,265 187,282 213,282" stroke="#ec4899" stroke-width="2.5"/>
-            <path d="M187,282 Q175,296 165,290" stroke="#db2777" stroke-width="2.5"/>
-            <path d="M213,282 Q225,296 235,290" stroke="#db2777" stroke-width="2.5"/>
-            <g filter="url(#glow-soft)">
-              <path stroke="#f43f5e" stroke-width="7" fill="none">
-                <animate attributeName="d" dur="0.55s" repeatCount="indefinite"
-                  values="M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368;
-                          M192,288 Q200,310 200,330 Q200,358 190,370 Q185,376 190,384;
-                          M192,288 Q200,305 200,320 Q200,345 192,355 Q188,360 192,368"/>
-              </path>
-              <ellipse cx="193" cy="370" rx="10" ry="7" stroke="#f43f5e" stroke-width="2">
-                <animate attributeName="cy" dur="0.55s" repeatCount="indefinite" values="366;382;366"/>
-              </ellipse>
-            </g>
-            <line x1="30"  y1="248" x2="165" y2="268" stroke="#6d28d9" stroke-width="2"/>
-            <line x1="20"  y1="270" x2="163" y2="278" stroke="#6d28d9" stroke-width="2"/>
-            <line x1="30"  y1="292" x2="165" y2="288" stroke="#6d28d9" stroke-width="2"/>
-            <line x1="370" y1="248" x2="235" y2="268" stroke="#6d28d9" stroke-width="2"/>
-            <line x1="380" y1="270" x2="237" y2="278" stroke="#6d28d9" stroke-width="2"/>
-            <line x1="370" y1="292" x2="235" y2="288" stroke="#6d28d9" stroke-width="2"/>
-          </g>
-        </svg>
-      </div>
       <div class="success-title">Анкета отправлена!</div>
       <p class="success-text">Спасибо! Мы уже сохранили вашу анкету.<br><br>Первое письмо с потенциальным проектом может прилететь уже скоро 😉</p>
     </div>
@@ -667,7 +678,7 @@ const DIRS = {
     label: 'Моушн-дизайн',
     specBlocks: [
       { title: 'Программы (можно выбрать несколько)', type: 'multi', id: 'm_soft', options: ['After Effects','Cinema 4D','Blender','Cavalry','Используете ИИ (Runway, Kling и др.)','Свой вариант'] },
-      { title: 'Стиль анимации (можно выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
+      { title: 'Стиль анимации (можно выбрать несколько)', type: 'multi', id: 'm_style', options: ['2D-анимация','3D-анимация','ИИ-анимация','Скрайбинг-анимация','Инфографика и данные','Кинетическая типографика','Персонажная анимация','Свой вариант'] },
       { title: 'Сроки по типу задачи', type: 'fields', fields: [
         { id: 'm_time_logo', label: 'Заставка / лого-анимация (3–5 сек)', placeholder: 'пр. 1–2 дня' },
         { id: 'm_time_info', label: 'Инфографика 30 сек (2D)', placeholder: 'пр. 3–5 дней' },
